@@ -1,6 +1,7 @@
-package resultado;
+package torneio;
 
-import torneio.Treinador;
+import resultado.ResultadoBatalha;
+import resultado.Treinador;
 
 import java.util.ArrayList;
 import java.util.HashSet;
