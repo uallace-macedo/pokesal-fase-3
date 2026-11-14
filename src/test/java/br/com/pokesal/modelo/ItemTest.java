@@ -42,7 +42,7 @@ class ItemTest {
   @Test
   @DisplayName("A cura nunca ultrapassa o HP máximo")
   void testCuraRespeitaHpMaximo() {
-    alvo.recuperarVida(25);
+    alvo.recuperarVida(45);
 
     new Item(TipoItem.SUPER_POCAO).aplicar(alvo);
 
