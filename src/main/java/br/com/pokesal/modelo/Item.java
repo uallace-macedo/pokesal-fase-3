@@ -3,110 +3,60 @@ package br.com.pokesal.modelo;
 import br.com.pokesal.enums.EfeitoStatus;
 import br.com.pokesal.enums.TipoItem;
 
-/** Representa um item que pode ser utilizado durante uma batalha. */
+/** Item de uso único que um treinador pode aplicar ao seu Pokésal. */
 public class Item {
-
-  private static final int CURA_POCAO = 20;
-  private static final int CURA_SUPER_POCAO = 40;
-  private static final int QUANTIDADE_INICIAL_MINIMA = 0;
-
-  private final String nome;
   private final TipoItem tipo;
-  private int quantidade;
+  private boolean usado;
 
   /**
-   * Cria um item com nome, tipo e quantidade inicial.
+   * Cria um item ainda não usado.
    *
-   * @param nome nome do item
    * @param tipo tipo do item
-   * @param quantidade quantidade disponível
    */
-  public Item(String nome, TipoItem tipo, int quantidade) {
-    if (nome == null || nome.isBlank()) {
-      throw new IllegalArgumentException("O nome do item não pode ser vazio");
-    }
-
-    if (tipo == null) {
-      throw new IllegalArgumentException("O tipo do item é obrigatório");
-    }
-
-    if (quantidade < QUANTIDADE_INICIAL_MINIMA) {
-      throw new IllegalArgumentException("A quantidade não pode ser negativa");
-    }
-
-    this.nome = nome;
+  public Item(TipoItem tipo) {
     this.tipo = tipo;
-    this.quantidade = quantidade;
-  }
-
-  public String getNome() {
-    return nome;
-  }
-
-  public TipoItem getTipo() {
-    return tipo;
-  }
-
-  public int getQuantidade() {
-    return quantidade;
-  }
-
-  public boolean estaDisponivel() {
-    return quantidade > QUANTIDADE_INICIAL_MINIMA;
   }
 
   /**
-   * Verifica se o item pode ser utilizado no pokesal informado.
+   * Indica se o item ainda pode ser usado.
    *
-   * @param alvo pokesal que receberá o efeito
-   * @return true se o item puder ser utilizado
+   * @return {@code true} se o item não foi usado
    */
-  public boolean podeSerUsado(Pokesal alvo) {
-    if (alvo == null || !estaDisponivel() || !alvo.estaVivo()) {
-      return false;
-    }
-
-    return switch (tipo) {
-      case POCAO, SUPER_POCAO -> alvo.getHpAtual() < alvo.getHpMaximo();
-      case ANTIDOTO -> alvo.getEfeitoStatus() == EfeitoStatus.ENVENENADO;
-    };
+  public boolean podeSerUsado() {
+    return !usado;
   }
 
   /**
-   * Aplica o efeito do item e consome uma unidade.
+   * Aplica o item ao Pokésal alvo e o marca como usado.
    *
-   * @param alvo pokesal que receberá o efeito
+   * @param alvo Pokésal que recebe o efeito
+   * @throws IllegalStateException se o item já foi usado
    */
   public void aplicar(Pokesal alvo) {
-    if (!podeSerUsado(alvo)) {
-      throw new IllegalStateException("O item não pode ser utilizado");
+    if (usado) {
+      throw new IllegalStateException("O item já foi usado.");
     }
-
-    switch (tipo) {
-      case POCAO -> alvo.recuperarVida(CURA_POCAO);
-      case SUPER_POCAO -> alvo.recuperarVida(CURA_SUPER_POCAO);
-      case ANTIDOTO -> alvo.removerStatus();
+    if (tipo == TipoItem.ANTIDOTO) {
+      if (alvo.getEfeitoStatus() == EfeitoStatus.ENVENENADO) {
+        alvo.removerStatus();
+      }
+    } else {
+      alvo.recuperarVida(tipo.getCura());
     }
+    usado = true;
+  }
 
-    consumir();
+  /** Torna o item utilizável novamente, para uma nova batalha. */
+  public void reiniciar() {
+    usado = false;
   }
 
   /**
-   * Cria uma cópia independente do item.
+   * Retorna o tipo do item.
    *
-   * @return cópia do item
+   * @return tipo do item
    */
-  public Item copiar() {
-    return new Item(nome, tipo, quantidade);
-  }
-
-  /** Consome uma unidade do item. */
-  boolean consumir() {
-    if (!estaDisponivel()) {
-      return false;
-    }
-
-    quantidade--;
-    return true;
+  public TipoItem getTipo() {
+    return tipo;
   }
 }

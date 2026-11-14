@@ -1,88 +1,82 @@
 package br.com.pokesal.catalogo;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import br.com.pokesal.enums.EfeitoStatus;
 import br.com.pokesal.enums.TipoElemental;
 import br.com.pokesal.modelo.Ataque;
 import br.com.pokesal.modelo.Pokesal;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class CatalogoPokesalTest {
+  private List<Pokesal> iniciais;
 
-  @Test
-  void deveCriarSeisPokesals() {
-    List<Pokesal> pokesals = CatalogoPokesal.criarIniciais();
-
-    assertEquals(6, pokesals.size());
+  @BeforeEach
+  void setUp() {
+    iniciais = CatalogoPokesal.criarIniciais();
   }
 
   @Test
-  void deveCriarIniciaisComTresAtaques() {
-    List<Pokesal> pokesals = CatalogoPokesal.criarIniciais();
+  @DisplayName("O catálogo tem os seis Pokésals iniciais, na ordem")
+  void testNomesDosIniciais() {
+    assertEquals(
+            List.of("BulbaSal", "CharSal", "SquirtSal", "ChikoSal", "CyndaSal", "TotoSal"),
+            iniciais.stream().map(Pokesal::getNome).toList());
+  }
 
-    for (Pokesal pokesal : pokesals) {
-      assertEquals(3, pokesal.getAtaques().size());
+  @Test
+  @DisplayName("BulbaSal tem os atributos da tabela do projeto")
+  void testAtributosDoBulbaSal() {
+    Pokesal bulba = iniciais.get(0);
+
+    assertAll(
+            () -> assertEquals(TipoElemental.PLANTA, bulba.getTipo()),
+            () -> assertEquals(110, bulba.getHpMaximo()),
+            () -> assertEquals(45, bulba.getAtaqueEfetivo()),
+            () -> assertEquals(50, bulba.getDefesa()),
+            () -> assertEquals(40, bulba.getVelocidadeEfetiva()));
+  }
+
+  @Test
+  @DisplayName("CyndaSal é o mais rápido, com velocidade 60")
+  void testVelocidadeDoCyndaSal() {
+    assertEquals(60, iniciais.get(4).getVelocidadeEfetiva());
+  }
+
+  @Test
+  @DisplayName("Cada Pokésal tem ataque normal, elemental e com efeito de status")
+  void testTresAtaquesPorPokesal() {
+    for (Pokesal pokesal : iniciais) {
+      Ataque normal = pokesal.getAtaques().get(0);
+      Ataque elemental = pokesal.getAtaques().get(1);
+      Ataque comStatus = pokesal.getAtaques().get(2);
+
+      assertAll(
+              () -> assertEquals(3, pokesal.getAtaques().size()),
+              () -> assertEquals("Investida", normal.nome()),
+              () -> assertEquals(TipoElemental.NORMAL, normal.tipo()),
+              () -> assertEquals(15, normal.danoBase()),
+              () -> assertEquals(pokesal.getTipo(), elemental.tipo()),
+              () -> assertEquals(25, elemental.danoBase()),
+              () -> assertNotEquals(EfeitoStatus.NENHUM, comStatus.efeitoStatus()));
     }
   }
 
   @Test
-  void deveCriarBulbaSalComAtributosCorretos() {
-    Pokesal bulbaSal = CatalogoPokesal.criarIniciais().get(0);
+  @DisplayName("Cada chamada cria novas instâncias, com HP cheio")
+  void testNovasInstanciasACadaChamada() {
+    iniciais.get(0).receberDano(50);
 
-    assertEquals("BulbaSal", bulbaSal.getNome());
-    assertEquals(TipoElemental.PLANTA, bulbaSal.getTipo());
-    assertEquals(110, bulbaSal.getHpMaximo());
-    assertEquals(45, bulbaSal.getAtaque());
-    assertEquals(50, bulbaSal.getDefesa());
-    assertEquals(40, bulbaSal.getVelocidade());
-  }
+    List<Pokesal> novos = CatalogoPokesal.criarIniciais();
 
-  @Test
-  void deveCriarAtaquesComDanosCorretos() {
-    List<Pokesal> pokesals = CatalogoPokesal.criarIniciais();
-
-    for (Pokesal pokesal : pokesals) {
-      List<Ataque> ataques = pokesal.getAtaques();
-
-      assertEquals(15, ataques.get(0).getDanoBase());
-      assertEquals(25, ataques.get(1).getDanoBase());
-    }
-  }
-
-  @Test
-  void deveCriarAtaquesDeStatusComDanosCorretos() {
-    List<Pokesal> pokesals = CatalogoPokesal.criarIniciais();
-
-    for (Pokesal pokesal : pokesals) {
-      Ataque ataqueStatus = pokesal.getAtaques().get(2);
-
-      if (ataqueStatus.getEfeitoStatus() == EfeitoStatus.QUEIMADO) {
-        assertEquals(15, ataqueStatus.getDanoBase());
-      } else {
-        assertEquals(10, ataqueStatus.getDanoBase());
-      }
-    }
-  }
-
-  @Test
-  void deveCriarAtaquesComOsEfeitosDeStatusEsperados() {
-    List<Pokesal> pokesals = CatalogoPokesal.criarIniciais();
-
-    assertEquals(EfeitoStatus.ENVENENADO, pokesals.get(0).getAtaques().get(2).getEfeitoStatus());
-
-    assertEquals(EfeitoStatus.QUEIMADO, pokesals.get(1).getAtaques().get(2).getEfeitoStatus());
-
-    assertEquals(EfeitoStatus.PARALISADO, pokesals.get(2).getAtaques().get(2).getEfeitoStatus());
-  }
-
-  @Test
-  void investidaNaoDeveSerElemental() {
-    List<Pokesal> pokesals = CatalogoPokesal.criarIniciais();
-
-    for (Pokesal pokesal : pokesals) {
-      assertEquals(false, pokesal.getAtaques().get(0).isElemental());
-    }
+    assertAll(
+            () -> assertNotSame(iniciais.get(0), novos.get(0)),
+            () -> assertEquals(110, novos.get(0).getHpAtual()));
   }
 }

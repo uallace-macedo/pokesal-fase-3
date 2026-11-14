@@ -6,173 +6,53 @@ import br.com.pokesal.modelo.Ataque;
 import br.com.pokesal.modelo.Pokesal;
 import java.util.List;
 
-/** Catálogo dos pokesals iniciais disponíveis. */
+/** Catálogo dos seis Pokésals iniciais disponíveis para escolha. */
 public final class CatalogoPokesal {
-
-  private static final int DANO_INVESTIDA = 15;
+  private static final int DANO_NORMAL = 15;
   private static final int DANO_ELEMENTAL = 25;
-  private static final int DANO_STATUS = 10;
-  private static final int DANO_STATUS_QUEIMADURA = 15;
-
-  private static final int HP_BULBASAL = 110;
-  private static final int ATAQUE_BULBASAL = 45;
-  private static final int DEFESA_BULBASAL = 50;
-  private static final int VELOCIDADE_BULBASAL = 40;
-
-  private static final int HP_CHARSAL = 95;
-  private static final int ATAQUE_CHARSAL = 55;
-  private static final int DEFESA_CHARSAL = 35;
-  private static final int VELOCIDADE_CHARSAL = 55;
-
-  private static final int HP_SQUIRTSAL = 105;
-  private static final int ATAQUE_SQUIRTSAL = 40;
-  private static final int DEFESA_SQUIRTSAL = 55;
-  private static final int VELOCIDADE_SQUIRTSAL = 35;
-
-  private static final int HP_CHIKOSAL = 100;
-  private static final int ATAQUE_CHIKOSAL = 40;
-  private static final int DEFESA_CHIKOSAL = 50;
-  private static final int VELOCIDADE_CHIKOSAL = 45;
-
-  private static final int HP_CYNDASAL = 90;
-  private static final int ATAQUE_CYNDASAL = 55;
-  private static final int DEFESA_CYNDASAL = 35;
-  private static final int VELOCIDADE_CYNDASAL = 60;
-
-  private static final int HP_TOTOSAL = 100;
-  private static final int ATAQUE_TOTOSAL = 45;
-  private static final int DEFESA_TOTOSAL = 45;
-  private static final int VELOCIDADE_TOTOSAL = 50;
+  private static final int PRECISAO_NORMAL = 100;
+  private static final int PRECISAO_ELEMENTAL = 90;
+  private static final int PRECISAO_STATUS = 80;
 
   private CatalogoPokesal() {}
 
   /**
-   * Cria os seis pokesals iniciais.
+   * Cria novas instâncias dos seis Pokésals iniciais, com HP cheio.
    *
-   * @return lista de pokesals disponíveis
+   * @return lista com BulbaSal, CharSal, SquirtSal, ChikoSal, CyndaSal e TotoSal
    */
   public static List<Pokesal> criarIniciais() {
     return List.of(
-        criarBulbaSal(),
-        criarCharSal(),
-        criarSquirtSal(),
-        criarChikoSal(),
-        criarCyndaSal(),
-        criarTotoSal());
+            criar("BulbaSal", TipoElemental.PLANTA, new int[] {110, 45, 50, 40},
+                    "Folha Navalha", "Pó Venenoso", 10, EfeitoStatus.ENVENENADO),
+            criar("CharSal", TipoElemental.FOGO, new int[] {95, 55, 35, 55},
+                    "Brasas", "Chama Ardente", 15, EfeitoStatus.QUEIMADO),
+            criar("SquirtSal", TipoElemental.AGUA, new int[] {105, 40, 55, 35},
+                    "Jato d'Água", "Água Paralisante", 10, EfeitoStatus.PARALISADO),
+            criar("ChikoSal", TipoElemental.PLANTA, new int[] {100, 40, 50, 45},
+                    "Chicote de Folhas", "Esporos Venenosos", 10, EfeitoStatus.ENVENENADO),
+            criar("CyndaSal", TipoElemental.FOGO, new int[] {90, 55, 35, 60},
+                    "Roda de Fogo", "Fumaça Ardente", 15, EfeitoStatus.QUEIMADO),
+            criar("TotoSal", TipoElemental.AGUA, new int[] {100, 45, 45, 50},
+                    "Jato d'Água", "Pulso Paralisante", 10, EfeitoStatus.PARALISADO));
   }
 
-  private static Pokesal criarBulbaSal() {
-    TipoElemental tipo = TipoElemental.PLANTA;
-
-    return criarPokesal(
-        "BulbaSal",
-        tipo,
-        HP_BULBASAL,
-        ATAQUE_BULBASAL,
-        DEFESA_BULBASAL,
-        VELOCIDADE_BULBASAL,
-        ataqueNormal(tipo),
-        new Ataque("Folha Navalha", tipo, DANO_ELEMENTAL, EfeitoStatus.NENHUM),
-        new Ataque("Pó Venenoso", tipo, DANO_STATUS, EfeitoStatus.ENVENENADO));
-  }
-
-  private static Pokesal criarCharSal() {
-    TipoElemental tipo = TipoElemental.FOGO;
-
-    return criarPokesal(
-        "CharSal",
-        tipo,
-        HP_CHARSAL,
-        ATAQUE_CHARSAL,
-        DEFESA_CHARSAL,
-        VELOCIDADE_CHARSAL,
-        ataqueNormal(tipo),
-        new Ataque("Brasas", tipo, DANO_ELEMENTAL, EfeitoStatus.NENHUM),
-        new Ataque("Chama Ardente", tipo, DANO_STATUS_QUEIMADURA, EfeitoStatus.QUEIMADO));
-  }
-
-  private static Pokesal criarSquirtSal() {
-    TipoElemental tipo = TipoElemental.AGUA;
-
-    return criarPokesal(
-        "SquirtSal",
-        tipo,
-        HP_SQUIRTSAL,
-        ATAQUE_SQUIRTSAL,
-        DEFESA_SQUIRTSAL,
-        VELOCIDADE_SQUIRTSAL,
-        ataqueNormal(tipo),
-        new Ataque("Jato d'Água", tipo, DANO_ELEMENTAL, EfeitoStatus.NENHUM),
-        new Ataque("Água Paralisante", tipo, DANO_STATUS, EfeitoStatus.PARALISADO));
-  }
-
-  private static Pokesal criarChikoSal() {
-    TipoElemental tipo = TipoElemental.PLANTA;
-
-    return criarPokesal(
-        "ChikoSal",
-        tipo,
-        HP_CHIKOSAL,
-        ATAQUE_CHIKOSAL,
-        DEFESA_CHIKOSAL,
-        VELOCIDADE_CHIKOSAL,
-        ataqueNormal(tipo),
-        new Ataque("Chicote de Folhas", tipo, DANO_ELEMENTAL, EfeitoStatus.NENHUM),
-        new Ataque("Esporos Venenosos", tipo, DANO_STATUS, EfeitoStatus.ENVENENADO));
-  }
-
-  private static Pokesal criarCyndaSal() {
-    TipoElemental tipo = TipoElemental.FOGO;
-
-    return criarPokesal(
-        "CyndaSal",
-        tipo,
-        HP_CYNDASAL,
-        ATAQUE_CYNDASAL,
-        DEFESA_CYNDASAL,
-        VELOCIDADE_CYNDASAL,
-        ataqueNormal(tipo),
-        new Ataque("Roda de Fogo", tipo, DANO_ELEMENTAL, EfeitoStatus.NENHUM),
-        new Ataque("Fumaça Ardente", tipo, DANO_STATUS_QUEIMADURA, EfeitoStatus.QUEIMADO));
-  }
-
-  private static Pokesal criarTotoSal() {
-    TipoElemental tipo = TipoElemental.AGUA;
-
-    return criarPokesal(
-        "TotoSal",
-        tipo,
-        HP_TOTOSAL,
-        ATAQUE_TOTOSAL,
-        DEFESA_TOTOSAL,
-        VELOCIDADE_TOTOSAL,
-        ataqueNormal(tipo),
-        new Ataque("Jato d'Água", tipo, DANO_ELEMENTAL, EfeitoStatus.NENHUM),
-        new Ataque("Pulso Paralisante", tipo, DANO_STATUS, EfeitoStatus.PARALISADO));
-  }
-
-  private static Ataque ataqueNormal(TipoElemental tipo) {
-    return new Ataque("Investida", tipo, DANO_INVESTIDA, EfeitoStatus.NENHUM, false);
-  }
-
-  private static Pokesal criarPokesal(
-      String nome,
-      TipoElemental tipo,
-      int hp,
-      int ataque,
-      int defesa,
-      int velocidade,
-      Ataque ataqueNormal,
-      Ataque ataqueElemental,
-      Ataque ataqueStatus) {
-
-    return new Pokesal(
-        nome,
-        tipo,
-        hp,
-        ataque,
-        defesa,
-        velocidade,
-        List.of(ataqueNormal, ataqueElemental, ataqueStatus));
+  /** Atributos na ordem: HP, ATK, DEF, SPD. */
+  private static Pokesal criar(
+          String nome,
+          TipoElemental tipo,
+          int[] atributos,
+          String nomeElemental,
+          String nomeStatus,
+          int danoStatus,
+          EfeitoStatus efeito) {
+    List<Ataque> ataques =
+            List.of(
+                    new Ataque("Investida", TipoElemental.NORMAL, DANO_NORMAL, PRECISAO_NORMAL,
+                            EfeitoStatus.NENHUM),
+                    new Ataque(nomeElemental, tipo, DANO_ELEMENTAL, PRECISAO_ELEMENTAL,
+                            EfeitoStatus.NENHUM),
+                    new Ataque(nomeStatus, tipo, danoStatus, PRECISAO_STATUS, efeito));
+    return new Pokesal(nome, tipo, atributos[0], atributos[1], atributos[2], atributos[3], ataques);
   }
 }
