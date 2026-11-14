@@ -1,450 +1,520 @@
 package br.com.pokesal.batalha;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import br.com.pokesal.enums.EfeitoStatus;
-import br.com.pokesal.enums.TipoTerreno;
 import br.com.pokesal.enums.TipoElemental;
+import br.com.pokesal.enums.TipoTerreno;
+import br.com.pokesal.modelo.Acao;
 import br.com.pokesal.modelo.Ataque;
+import br.com.pokesal.modelo.Item;
 import br.com.pokesal.modelo.Pokesal;
 import br.com.pokesal.modelo.Treinador;
+import br.com.pokesal.resultado.RepositorioResultados;
+import br.com.pokesal.resultado.ResultadoBatalha;
+import br.com.pokesal.terreno.ServicoTerreno;
 import java.util.List;
-import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * Colaboradores mockados: GeradorAleatorio, ServicoTerreno, RepositorioResultados,
+ * RegistroBatalha e ContextoBatalha (sem parada). Pokesal e Treinador são objetos reais (ver
+ * documento de testes).
+ *
+ * <p>Com o golpe padrão (dano base 20), ATK 50 e DEF 30, o dano sem multiplicadores é 40.
+ */
+@ExtendWith(MockitoExtension.class)
 class BatalhaTest {
+  private static final int FAIXA_PRECISAO = 100;
+  private static final int FAIXA_CRITICO = 16;
 
-  private Batalha batalha;
-  private Pokesal planta;
-  private Pokesal fogo;
-  private Pokesal agua;
+  @Mock private GeradorAleatorio gerador;
+  @Mock private ServicoTerreno servicoTerreno;
+  @Mock private RepositorioResultados repositorio;
+  @Mock private RegistroBatalha registro;
+  @Mock private ContextoBatalha contexto;
+
+  private Ataque golpe;
+  private Pokesal alfa;
+  private Pokesal beta;
+  private Treinador ana;
+  private Treinador bruno;
 
   @BeforeEach
   void setUp() {
-    batalha = new Batalha(TipoTerreno.CANTEIRO_CENTRAL, semCritico());
-    planta = criarPokesal("BulbaSal", TipoElemental.PLANTA, 110, 45, 50, 40);
-    fogo = criarPokesal("CharSal", TipoElemental.FOGO, 95, 55, 35, 55);
-    agua = criarPokesal("SquirtSal", TipoElemental.AGUA, 105, 40, 55, 35);
+    golpe = new Ataque("Golpe", TipoElemental.NORMAL, 20, 100, EfeitoStatus.NENHUM);
+    alfa = criarPokesal("Alfa", TipoElemental.NORMAL, 100, 50);
+    beta = criarPokesal("Beta", TipoElemental.NORMAL, 100, 50);
+    ana = new Treinador("Ana", alfa);
+    bruno = new Treinador("Bruno", beta);
   }
 
-  private Pokesal criarPokesal(
-      String nome, TipoElemental tipo, int hp, int ataque, int defesa, int velocidade) {
-
-    List<Ataque> ataques =
-        List.of(
-            new Ataque("Investida", tipo, 15, EfeitoStatus.NENHUM, false),
-            new Ataque("Ataque Elemental", tipo, 25, EfeitoStatus.NENHUM),
-            new Ataque("Ataque de Status", tipo, 10, EfeitoStatus.ENVENENADO));
-
-    return new Pokesal(nome, tipo, hp, ataque, defesa, velocidade, ataques);
+  private Pokesal criarPokesal(String nome, TipoElemental tipo, int hp, int velocidade) {
+    return new Pokesal(nome, tipo, hp, 50, 30, velocidade, List.of(golpe));
   }
 
-  private Random semCritico() {
-    return new Random(1) {
-      @Override
-      public int nextInt(int bound) {
-        return 99;
-      }
-    };
+  private Batalha criarBatalha(TipoTerreno terreno) {
+    when(servicoTerreno.consultar()).thenReturn(terreno);
+    return new Batalha(ana, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
   }
 
-  private Random comCritico() {
-    return new Random(1) {
-      @Override
-      public int nextInt(int bound) {
-        return 0;
-      }
-    };
+  private void sortearAcertoSemCritico() {
+    when(gerador.proximoInteiro(FAIXA_PRECISAO)).thenReturn(0);
+    when(gerador.proximoInteiro(FAIXA_CRITICO)).thenReturn(1);
   }
 
-  private Ataque criarAtaque(String nome, int dano, TipoElemental tipo, EfeitoStatus efeito) {
-    return new Ataque(nome, tipo, dano, efeito);
+  // ---------- RN01: golpe crítico e precisão ----------
+
+  @Test
+  @DisplayName("RN01: crítico multiplica o dano por 1,5 quando o gerador cai na faixa de crítico")
+  void testAcertoCriticoComGeradorMockado() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    when(gerador.proximoInteiro(FAIXA_PRECISAO)).thenReturn(0);
+    when(gerador.proximoInteiro(FAIXA_CRITICO)).thenReturn(0);
+
+    int dano = batalha.executarAtaque(golpe, alfa, beta);
+
+    assertAll(
+            () -> assertEquals(60, dano),
+            () -> assertEquals(40, beta.getHpAtual()));
+    verify(registro).registrarDano(beta, 60, true);
   }
 
   @Test
-  void deveRetornarTerrenoDaBatalha() {
-    assertEquals(TipoTerreno.CANTEIRO_CENTRAL, batalha.getTerreno());
+  @DisplayName("Sem crítico o dano não recebe o multiplicador 1,5")
+  void testAcertoSemCritico() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    sortearAcertoSemCritico();
+
+    int dano = batalha.executarAtaque(golpe, alfa, beta);
+
+    assertEquals(40, dano);
+    verify(registro).registrarDano(beta, 40, false);
   }
 
   @Test
-  void deveRejeitarTerrenoNulo() {
-    assertThrows(NullPointerException.class, () -> new Batalha(null));
+  @DisplayName("Golpe erra quando o sorteio de precisão é maior ou igual à precisão")
+  void testGolpeErraQuandoPrecisaoFalha() {
+    Ataque impreciso = new Ataque("Impreciso", TipoElemental.NORMAL, 20, 90, EfeitoStatus.NENHUM);
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    when(gerador.proximoInteiro(FAIXA_PRECISAO)).thenReturn(95);
+
+    int dano = batalha.executarAtaque(impreciso, alfa, beta);
+
+    assertAll(
+            () -> assertEquals(0, dano),
+            () -> assertEquals(100, beta.getHpAtual()));
+    verify(registro).registrarDano(beta, 0, false);
+    verify(gerador, never()).proximoInteiro(FAIXA_CRITICO);
   }
 
   @Test
-  void deveRejeitarGeradorAleatorioNulo() {
-    assertThrows(NullPointerException.class, () -> new Batalha(TipoTerreno.ASFALTO_QUENTE, null));
+  @DisplayName("Valor-limite de precisão: sorteio 89 acerta e 90 erra para precisão 90")
+  void testRetornosEmSequenciaDoGerador() {
+    Ataque impreciso = new Ataque("Impreciso", TipoElemental.NORMAL, 20, 90, EfeitoStatus.NENHUM);
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    when(gerador.proximoInteiro(FAIXA_PRECISAO)).thenReturn(89, 90);
+    when(gerador.proximoInteiro(FAIXA_CRITICO)).thenReturn(1);
+
+    int primeiro = batalha.executarAtaque(impreciso, alfa, beta);
+    int segundo = batalha.executarAtaque(impreciso, alfa, beta);
+
+    assertAll(() -> assertEquals(40, primeiro), () -> assertEquals(0, segundo));
+    verify(gerador, times(2)).proximoInteiro(FAIXA_PRECISAO);
+    verify(gerador, times(1)).proximoInteiro(FAIXA_CRITICO);
   }
 
   @Test
-  void deveRetornarMultiplicadorNeutroParaTiposIguais() {
-    assertEquals(
-        1.0, batalha.calcularMultiplicadorElemental(TipoElemental.FOGO, TipoElemental.FOGO));
+  @DisplayName("Golpe com efeito aplica o status ao acertar")
+  void testGolpeComEfeitoAplicaStatus() {
+    Ataque veneno = new Ataque("Veneno", TipoElemental.NORMAL, 10, 100, EfeitoStatus.ENVENENADO);
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    sortearAcertoSemCritico();
+
+    batalha.executarAtaque(veneno, alfa, beta);
+
+    assertEquals(EfeitoStatus.ENVENENADO, beta.getEfeitoStatus());
   }
 
   @Test
-  void deveCalcularTodasAsVantagensElementais() {
-    assertEquals(
-        2.0, batalha.calcularMultiplicadorElemental(TipoElemental.FOGO, TipoElemental.PLANTA));
+  @DisplayName("Golpe com efeito não aplica o status quando erra")
+  void testGolpeComEfeitoNaoAplicaStatusAoErrar() {
+    Ataque veneno = new Ataque("Veneno", TipoElemental.NORMAL, 10, 50, EfeitoStatus.ENVENENADO);
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    when(gerador.proximoInteiro(FAIXA_PRECISAO)).thenReturn(60);
 
-    assertEquals(
-        2.0, batalha.calcularMultiplicadorElemental(TipoElemental.PLANTA, TipoElemental.AGUA));
+    batalha.executarAtaque(veneno, alfa, beta);
 
-    assertEquals(
-        2.0, batalha.calcularMultiplicadorElemental(TipoElemental.AGUA, TipoElemental.FOGO));
+    assertEquals(EfeitoStatus.NENHUM, beta.getEfeitoStatus());
+  }
+
+  // ---------- Dano: tipos e terrenos ----------
+
+  @Test
+  @DisplayName("Vantagem elemental dobra o dano e desvantagem o reduz à metade")
+  void testVantagemEDesvantagemNoDano() {
+    Ataque fogo = new Ataque("Brasas", TipoElemental.FOGO, 20, 100, EfeitoStatus.NENHUM);
+    Pokesal planta = criarPokesal("Planta", TipoElemental.PLANTA, 100, 50);
+    Pokesal agua = criarPokesal("Agua", TipoElemental.AGUA, 100, 50);
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+
+    assertAll(
+            () -> assertEquals(80, batalha.calcularDano(fogo, alfa, planta, false)),
+            () -> assertEquals(20, batalha.calcularDano(fogo, alfa, agua, false)));
   }
 
   @Test
-  void deveCalcularTodasAsDesvantagensElementais() {
-    assertEquals(
-        0.5, batalha.calcularMultiplicadorElemental(TipoElemental.PLANTA, TipoElemental.FOGO));
+  @DisplayName("Asfalto Quente aumenta em 15% o dano de Fogo")
+  void testAsfaltoQuenteAumentaDanoDeFogo() {
+    Ataque fogo = new Ataque("Brasas", TipoElemental.FOGO, 20, 100, EfeitoStatus.NENHUM);
+    Pokesal alvoFogo = criarPokesal("AlvoFogo", TipoElemental.FOGO, 100, 50);
 
-    assertEquals(
-        0.5, batalha.calcularMultiplicadorElemental(TipoElemental.AGUA, TipoElemental.PLANTA));
+    Batalha asfalto = criarBatalha(TipoTerreno.ASFALTO_QUENTE);
+    Batalha neutra = criarBatalha(TipoTerreno.SEM_EFEITO);
 
-    assertEquals(
-        0.5, batalha.calcularMultiplicadorElemental(TipoElemental.FOGO, TipoElemental.AGUA));
+    int comTerreno = asfalto.calcularDano(fogo, alfa, alvoFogo, false);
+    int semTerreno = neutra.calcularDano(fogo, alfa, alvoFogo, false);
+
+    assertAll(() -> assertEquals(46, comTerreno), () -> assertEquals(40, semTerreno));
   }
 
   @Test
-  void deveRejeitarTipoDeAtaqueNuloNoCalculoElemental() {
+  @DisplayName("Poça d'água aumenta em 10% o dano de Água e não altera o de Fogo")
+  void testPocaDAguaAumentaDanoDeAgua() {
+    Ataque agua = new Ataque("Jato", TipoElemental.AGUA, 20, 100, EfeitoStatus.NENHUM);
+    Ataque fogo = new Ataque("Brasas", TipoElemental.FOGO, 20, 100, EfeitoStatus.NENHUM);
+    Pokesal alvoAgua = criarPokesal("AlvoAgua", TipoElemental.AGUA, 100, 50);
+    Batalha batalha = criarBatalha(TipoTerreno.POCA_DAGUA);
+
+    assertAll(
+            () -> assertEquals(44, batalha.calcularDano(agua, alfa, alvoAgua, false)),
+            () -> assertEquals(20, batalha.calcularDano(fogo, alfa, alvoAgua, false)));
+  }
+
+  @Test
+  @DisplayName("O dano mínimo é 1, mesmo com defesa muito alta")
+  void testDanoMinimoEhUm() {
+    Pokesal blindado = new Pokesal("Blindado", TipoElemental.NORMAL, 100, 50, 500, 50, List.of());
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+
+    assertEquals(1, batalha.calcularDano(golpe, alfa, blindado, false));
+  }
+
+  @Test
+  @DisplayName("Queimadura reduz o ataque e, por consequência, o dano")
+  void testAtaqueQueimadoCausaMenosDano() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    alfa.aplicarStatus(EfeitoStatus.QUEIMADO);
+
+    assertEquals(35, batalha.calcularDano(golpe, alfa, beta, false));
+  }
+
+  // ---------- Ordem de ataque ----------
+
+  @Test
+  @DisplayName("Quem tem maior velocidade ataca primeiro")
+  void testOrdemDeAtaquePorVelocidade() {
+    Pokesal rapido = criarPokesal("Rapido", TipoElemental.NORMAL, 100, 60);
+    Pokesal lento = criarPokesal("Lento", TipoElemental.NORMAL, 100, 40);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
+
+    Batalha rapidoPrimeiro =
+            new Batalha(new Treinador("A", rapido), new Treinador("B", lento),
+                    servicoTerreno, gerador, repositorio, registro, contexto);
+    Batalha lentoPrimeiro =
+            new Batalha(new Treinador("A", lento), new Treinador("B", rapido),
+                    servicoTerreno, gerador, repositorio, registro, contexto);
+
+    assertAll(
+            () -> assertTrue(rapidoPrimeiro.jogador1AtacaPrimeiro()),
+            () -> assertFalse(lentoPrimeiro.jogador1AtacaPrimeiro()));
+  }
+
+  @Test
+  @DisplayName("Com a mesma velocidade, o primeiro jogador ataca primeiro")
+  void testEmpateDeVelocidadeFavoreceJogador1() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+
+    assertTrue(batalha.jogador1AtacaPrimeiro());
+  }
+
+  @Test
+  @DisplayName("A paralisia reduz a velocidade e pode inverter a ordem de ataque")
+  void testParalisiaInverteOrdem() {
+    Pokesal quaseRapido = criarPokesal("Quase", TipoElemental.NORMAL, 100, 55);
+    Treinador paralisado = new Treinador("A", quaseRapido);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
+    Batalha batalha =
+            new Batalha(paralisado, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
+    quaseRapido.aplicarStatus(EfeitoStatus.PARALISADO);
+
+    assertFalse(batalha.jogador1AtacaPrimeiro());
+  }
+
+  // ---------- Turno, registro e itens ----------
+
+  @Test
+  @DisplayName("Os eventos do turno chegam ao registro na ordem correta")
+  void testSequenciaDeEventosNoTurno() {
+    Pokesal planta = criarPokesal("Planta", TipoElemental.PLANTA, 100, 60);
+    Treinador donoDaPlanta = new Treinador("Ana", planta);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.CANTEIRO_CENTRAL);
+    Batalha batalha =
+            new Batalha(donoDaPlanta, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
+    sortearAcertoSemCritico();
+    planta.aplicarStatus(EfeitoStatus.ENVENENADO);
+
+    batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
+
+    InOrder ordem = inOrder(registro);
+    ordem.verify(registro).registrarAtaque(planta, golpe, beta);
+    ordem.verify(registro).registrarDano(beta, 40, false);
+    ordem.verify(registro).registrarAtaque(beta, golpe, planta);
+    ordem.verify(registro).registrarDano(planta, 40, false);
+    ordem.verify(registro).registrarEfeitoStatus(planta, EfeitoStatus.ENVENENADO, 5);
+    ordem.verify(registro).registrarEfeitoTerreno(planta, TipoTerreno.CANTEIRO_CENTRAL, 5);
+    verify(registro, atLeastOnce()).registrarDano(any(Pokesal.class), anyInt(), anyBoolean());
+    assertEquals(60, planta.getHpAtual());
+  }
+
+  @Test
+  @DisplayName("Usar item consome o turno do treinador e é enviado ao registro")
+  void testUsoDeItemConsomeOTurno() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    sortearAcertoSemCritico();
+    alfa.receberDano(50);
+    Item pocao = ana.getInventario().get(0);
+
+    batalha.executarTurno(Acao.usarItem(pocao), Acao.atacar(golpe));
+
+    verify(registro).registrarUsoItem(ana, pocao);
+    verify(registro, never()).registrarAtaque(eq(alfa), any(Ataque.class), any(Pokesal.class));
+    verify(registro, times(1)).registrarAtaque(beta, golpe, alfa);
+    assertEquals(30, alfa.getHpAtual());
+  }
+
+  @Test
+  @DisplayName("Item que não pode ser usado interrompe o turno")
+  void testItemInvalidoLancaExcecao() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    Item estranho = new Item(br.com.pokesal.enums.TipoItem.POCAO);
+
     assertThrows(
-        NullPointerException.class,
-        () -> batalha.calcularMultiplicadorElemental(null, TipoElemental.FOGO));
+            IllegalArgumentException.class,
+            () -> batalha.executarTurno(Acao.usarItem(estranho), Acao.atacar(golpe)));
+    verify(registro, never()).registrarUsoItem(any(Treinador.class), any(Item.class));
   }
 
   @Test
-  void deveRejeitarTipoDeDefesaNuloNoCalculoElemental() {
+  @DisplayName("Fim de turno: o status causa dano e termina após a duração")
+  void testStatusNoFimDoTurno() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    beta.aplicarStatus(EfeitoStatus.QUEIMADO);
+
+    batalha.processarFimDoTurno(beta);
+    int hpAposPrimeiro = beta.getHpAtual();
+    batalha.processarFimDoTurno(beta);
+
+    assertAll(
+            () -> assertEquals(95, hpAposPrimeiro),
+            () -> assertEquals(90, beta.getHpAtual()),
+            () -> assertEquals(EfeitoStatus.NENHUM, beta.getEfeitoStatus()));
+    verify(registro, times(2)).registrarEfeitoStatus(beta, EfeitoStatus.QUEIMADO, 5);
+  }
+
+  @Test
+  @DisplayName("Canteiro Central cura 5% do HP máximo apenas de Pokésals de Planta")
+  void testCanteiroCentralCuraApenasPlanta() {
+    Pokesal planta = criarPokesal("Planta", TipoElemental.PLANTA, 100, 50);
+    Batalha batalha = criarBatalha(TipoTerreno.CANTEIRO_CENTRAL);
+    planta.receberDano(50);
+    beta.receberDano(50);
+
+    batalha.processarFimDoTurno(planta);
+    batalha.processarFimDoTurno(beta);
+
+    assertAll(
+            () -> assertEquals(55, planta.getHpAtual()),
+            () -> assertEquals(50, beta.getHpAtual()));
+    verify(registro).registrarEfeitoTerreno(planta, TipoTerreno.CANTEIRO_CENTRAL, 5);
+    verify(registro, never()).registrarEfeitoTerreno(eq(beta), any(TipoTerreno.class), anyInt());
+  }
+
+  @Test
+  @DisplayName("RN02: a cura do terreno não ultrapassa o HP máximo")
+  void testCuraDoTerrenoRespeitaHpMaximo() {
+    Pokesal planta = criarPokesal("Planta", TipoElemental.PLANTA, 100, 50);
+    Batalha batalha = criarBatalha(TipoTerreno.CANTEIRO_CENTRAL);
+    planta.receberDano(2);
+
+    batalha.processarFimDoTurno(planta);
+
+    assertEquals(100, planta.getHpAtual());
+    verify(registro).registrarEfeitoTerreno(planta, TipoTerreno.CANTEIRO_CENTRAL, 2);
+  }
+
+  // ---------- RN03: fim da batalha e repositório ----------
+
+  @Test
+  @DisplayName("RN03: a batalha só tem vencedor quando um Pokésal chega a zero de HP")
+  void testFimDaBatalhaQuandoPokesalNaoPodeLutar() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    assertTrue(batalha.verificarVencedor().isEmpty());
+
+    beta.receberDano(100);
+    assertSame(ana, batalha.verificarVencedor().orElseThrow());
+
+    Batalha outra =
+            new Batalha(ana, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
+    alfa.receberDano(100);
+    beta.restaurar();
+    assertSame(bruno, outra.verificarVencedor().orElseThrow());
+  }
+
+  @Test
+  @DisplayName("O resultado é salvo ao fim da batalha com vencedor, perdedor e turnos")
+  void testResultadoSalvoAoFimDaBatalha() {
+    Pokesal rapido = criarPokesal("Rapido", TipoElemental.NORMAL, 100, 60);
+    Pokesal fraco = criarPokesal("Fraco", TipoElemental.NORMAL, 30, 40);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
+    Batalha batalha =
+            new Batalha(new Treinador("Ana", rapido), new Treinador("Bruno", fraco),
+                    servicoTerreno, gerador, repositorio, registro, contexto);
+    sortearAcertoSemCritico();
+    ArgumentCaptor<ResultadoBatalha> captor = ArgumentCaptor.forClass(ResultadoBatalha.class);
+
+    batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
+
+    verify(repositorio, times(1)).salvar(captor.capture());
+    ResultadoBatalha salvo = captor.getValue();
+    assertAll(
+            () -> assertEquals("Ana", salvo.vencedor()),
+            () -> assertEquals("Bruno", salvo.perdedor()),
+            () -> assertEquals(1, salvo.turnos()),
+            () -> assertEquals("Rapido", salvo.pokesalVencedor()),
+            () -> assertEquals("Fraco", salvo.pokesalPerdedor()),
+            () -> assertTrue(batalha.estaTerminada()),
+            () -> assertEquals(salvo, batalha.getResultado().orElseThrow()));
+    verify(registro, times(1))
+            .registrarAtaque(any(Pokesal.class), any(Ataque.class), any(Pokesal.class));
+  }
+
+  @Test
+  @DisplayName("Falha no repositório não invalida a batalha")
+  void testFalhaNoRepositorioNaoInvalidaBatalha() {
+    Pokesal fraco = criarPokesal("Fraco", TipoElemental.NORMAL, 30, 40);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
+    Batalha batalha =
+            new Batalha(
+                    ana,
+                    new Treinador("Bruno", fraco),
+                    servicoTerreno,
+                    gerador,
+                    repositorio,
+                    registro,
+                    contexto);
+    sortearAcertoSemCritico();
+    doThrow(new IllegalStateException("banco indisponível"))
+            .when(repositorio).salvar(any(ResultadoBatalha.class));
+
+    assertDoesNotThrow(() -> batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe)));
+
+    assertAll(
+            () -> assertTrue(batalha.estaTerminada()),
+            () -> assertEquals("Ana", batalha.verificarVencedor().orElseThrow().getNome()),
+            () -> assertEquals("Ana", batalha.getResultado().orElseThrow().vencedor()));
+    verify(repositorio, times(1)).salvar(any(ResultadoBatalha.class));
+  }
+
+  @Test
+  @DisplayName("O repositório não é chamado enquanto a batalha não terminou")
+  void testRepositorioNaoChamadoSeBatalhaNaoTerminou() {
+    Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
+    sortearAcertoSemCritico();
+
+    batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
+
+    assertAll(
+            () -> assertFalse(batalha.estaTerminada()),
+            () -> assertTrue(batalha.getResultado().isEmpty()),
+            () -> assertEquals(1, batalha.getTurnos()));
+    verify(repositorio, never()).salvar(any(ResultadoBatalha.class));
+  }
+
+  @Test
+  @DisplayName("Depois do fim da batalha não é possível executar outro turno")
+  void testTurnoAposOFimLancaExcecao() {
+    Pokesal fraco = criarPokesal("Fraco", TipoElemental.NORMAL, 30, 40);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
+    Batalha batalha =
+            new Batalha(
+                    ana,
+                    new Treinador("Bruno", fraco),
+                    servicoTerreno,
+                    gerador,
+                    repositorio,
+                    registro,
+                    contexto);
+    sortearAcertoSemCritico();
+    batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
+
     assertThrows(
-        NullPointerException.class,
-        () -> batalha.calcularMultiplicadorElemental(TipoElemental.FOGO, null));
+            IllegalStateException.class,
+            () -> batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe)));
+    verify(repositorio, times(1)).salvar(any(ResultadoBatalha.class));
   }
 
   @Test
-  void deveAplicarBonusDeFogoNoAsfaltoQuente() {
-    Batalha batalhaAsfalto = new Batalha(TipoTerreno.ASFALTO_QUENTE);
+  @DisplayName("Um efeito de status ao fim do turno pode derrotar o Pokésal e encerrar a batalha")
+  void testStatusPodeDerrotarPokesalNoFimDoTurno() {
+    Pokesal rapido = criarPokesal("Rapido", TipoElemental.NORMAL, 100, 60);
+    Pokesal envenenado = criarPokesal("Envenenado", TipoElemental.NORMAL, 100, 40);
+    when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
+    Batalha batalha =
+            new Batalha(new Treinador("Ana", rapido), new Treinador("Bruno", envenenado),
+                    servicoTerreno, gerador, repositorio, registro, contexto);
+    sortearAcertoSemCritico();
+    rapido.receberDano(55);
+    rapido.aplicarStatus(EfeitoStatus.ENVENENADO);
 
-    assertEquals(1.15, batalhaAsfalto.calcularMultiplicadorTerreno(TipoElemental.FOGO));
+    batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
+
+    assertAll(
+            () -> assertEquals(0, rapido.getHpAtual()),
+            () -> assertEquals("Bruno", batalha.getResultado().orElseThrow().vencedor()));
+    verify(repositorio, times(1)).salvar(any(ResultadoBatalha.class));
   }
 
   @Test
-  void deveAplicarBonusDeAguaNaPocaDagua() {
-    Batalha batalhaPoca = new Batalha(TipoTerreno.POCA_DAGUA);
-
-    assertEquals(1.10, batalhaPoca.calcularMultiplicadorTerreno(TipoElemental.AGUA));
-  }
-
-  @Test
-  void naoDeveAplicarBonusQuandoTipoNaoCombinaComTerreno() {
-    assertEquals(
-        1.0, new Batalha(TipoTerreno.ASFALTO_QUENTE).calcularMultiplicadorTerreno(TipoElemental.AGUA));
-
-    assertEquals(
-        1.0, new Batalha(TipoTerreno.POCA_DAGUA).calcularMultiplicadorTerreno(TipoElemental.FOGO));
-
-    assertEquals(
-        1.0,
-        new Batalha(TipoTerreno.CANTEIRO_CENTRAL).calcularMultiplicadorTerreno(TipoElemental.PLANTA));
-  }
-
-  @Test
-  void deveRejeitarTipoNuloNoCalculoDoTerreno() {
-    assertThrows(NullPointerException.class, () -> batalha.calcularMultiplicadorTerreno(null));
-  }
-
-  @Test
-  void deveCalcularDanoMinimoDeUm() {
-    Pokesal atacante = criarPokesal("Fraco", TipoElemental.FOGO, 50, 1, 1, 10);
-    Pokesal defensor = criarPokesal("Forte", TipoElemental.AGUA, 100, 1, 100, 10);
-
-    Ataque ataque = criarAtaque("Ataque Fraco", 1, TipoElemental.FOGO, EfeitoStatus.NENHUM);
-
-    assertEquals(
-        1,
-        new Batalha(TipoTerreno.CANTEIRO_CENTRAL, semCritico())
-            .calcularDano(ataque, atacante, defensor));
-  }
-
-  @Test
-  void deveCalcularDanoComVantagemElemental() {
-    Ataque ataque = criarAtaque("Brasas", 25, TipoElemental.FOGO, EfeitoStatus.NENHUM);
-
-    assertEquals(
-        60, new Batalha(TipoTerreno.CANTEIRO_CENTRAL, semCritico()).calcularDano(ataque, fogo, planta));
-  }
-
-  @Test
-  void deveCalcularDanoCritico() {
-    Ataque ataque = criarAtaque("Brasas", 10, TipoElemental.FOGO, EfeitoStatus.NENHUM);
-
-    Pokesal atacante = criarPokesal("Atacante", TipoElemental.FOGO, 100, 10, 10, 10);
-
-    Pokesal defensor = criarPokesal("Defensor", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    assertEquals(
-        30,
-        new Batalha(TipoTerreno.CANTEIRO_CENTRAL, comCritico())
-            .calcularDano(ataque, atacante, defensor));
-  }
-
-  @Test
-  void investidaNaoDeveReceberMultiplicadoresElementaisOuDeTerreno() {
-    Pokesal atacante = criarPokesal("CharSal", TipoElemental.FOGO, 95, 55, 35, 55);
-
-    Pokesal defensor = criarPokesal("BulbaSal", TipoElemental.PLANTA, 110, 45, 50, 40);
-
-    Ataque investida = atacante.getAtaques().get(0);
-
-    assertEquals(
-        20,
-        new Batalha(TipoTerreno.ASFALTO_QUENTE, semCritico())
-            .calcularDano(investida, atacante, defensor));
-  }
-
-  @Test
-  void deveRejeitarAtaqueNuloNoCalculoDeDano() {
-    assertThrows(NullPointerException.class, () -> batalha.calcularDano(null, fogo, planta));
-  }
-
-  @Test
-  void deveRejeitarAtacanteNuloNoCalculoDeDano() {
-    Ataque ataque = criarAtaque("Investida", 15, TipoElemental.FOGO, EfeitoStatus.NENHUM);
-
-    assertThrows(NullPointerException.class, () -> batalha.calcularDano(ataque, null, planta));
-  }
-
-  @Test
-  void deveRejeitarDefensorNuloNoCalculoDeDano() {
-    Ataque ataque = criarAtaque("Investida", 15, TipoElemental.FOGO, EfeitoStatus.NENHUM);
-
-    assertThrows(NullPointerException.class, () -> batalha.calcularDano(ataque, fogo, null));
-  }
-
-  @Test
-  void jogadorMaisRapidoDeveAtacarPrimeiro() {
-    Treinador jogador1 = new Treinador("Jogador 1", fogo);
-    Treinador jogador2 = new Treinador("Jogador 2", planta);
-
-    assertTrue(batalha.jogador1AtacaPrimeiro(jogador1, jogador2));
-  }
-
-  @Test
-  void jogadorMaisLentoNaoDeveAtacarPrimeiro() {
-    Treinador jogador1 = new Treinador("Jogador 1", planta);
-    Treinador jogador2 = new Treinador("Jogador 2", fogo);
-
-    assertFalse(batalha.jogador1AtacaPrimeiro(jogador1, jogador2));
-  }
-
-  @Test
-  void jogador1DeveAtacarPrimeiroEmCasoDeEmpate() {
-    Pokesal pokesal1 = criarPokesal("Um", TipoElemental.FOGO, 100, 10, 10, 40);
-
-    Pokesal pokesal2 = criarPokesal("Dois", TipoElemental.AGUA, 100, 10, 10, 40);
-
-    assertTrue(
-        batalha.jogador1AtacaPrimeiro(
-            new Treinador("Jogador 1", pokesal1), new Treinador("Jogador 2", pokesal2)));
-  }
-
-  @Test
-  void jogadorParalisadoDevePerderVelocidadeNaIniciativa() {
-    Pokesal pokesal1 = criarPokesal("Paralisado", TipoElemental.FOGO, 100, 10, 10, 50);
-
-    Pokesal pokesal2 = criarPokesal("Normal", TipoElemental.AGUA, 100, 10, 10, 45);
-
-    pokesal1.aplicarStatus(EfeitoStatus.PARALISADO, 2);
-
-    assertFalse(
-        batalha.jogador1AtacaPrimeiro(
-            new Treinador("Jogador 1", pokesal1), new Treinador("Jogador 2", pokesal2)));
-  }
-
-  @Test
-  void deveRejeitarTreinadoresNulosNaVerificacaoDeIniciativa() {
-    Treinador treinador = new Treinador("Jogador", fogo);
-
-    assertThrows(NullPointerException.class, () -> batalha.jogador1AtacaPrimeiro(null, treinador));
-
-    assertThrows(NullPointerException.class, () -> batalha.jogador1AtacaPrimeiro(treinador, null));
-  }
-
-  @Test
-  void deveAplicarStatusQueimado() {
-    Ataque ataque = criarAtaque("Chama", 1, TipoElemental.FOGO, EfeitoStatus.QUEIMADO);
-
-    batalha.executarAtaque(ataque, fogo, planta);
-
-    assertEquals(EfeitoStatus.QUEIMADO, planta.getEfeitoStatus());
-  }
-
-  @Test
-  void deveAplicarStatusEnvenenado() {
-    Ataque ataque = criarAtaque("Veneno", 1, TipoElemental.FOGO, EfeitoStatus.ENVENENADO);
-
-    batalha.executarAtaque(ataque, fogo, planta);
-
-    assertEquals(EfeitoStatus.ENVENENADO, planta.getEfeitoStatus());
-  }
-
-  @Test
-  void deveAplicarStatusParalisado() {
-    Ataque ataque = criarAtaque("Paralisia", 1, TipoElemental.FOGO, EfeitoStatus.PARALISADO);
-
-    batalha.executarAtaque(ataque, fogo, planta);
-
-    assertEquals(EfeitoStatus.PARALISADO, planta.getEfeitoStatus());
-  }
-
-  @Test
-  void ataqueSemStatusNaoDeveAplicarEfeito() {
-    Ataque ataque = criarAtaque("Investida", 1, TipoElemental.FOGO, EfeitoStatus.NENHUM);
-
-    batalha.executarAtaque(ataque, fogo, planta);
-
-    assertEquals(EfeitoStatus.NENHUM, planta.getEfeitoStatus());
-  }
-
-  @Test
-  void naoDeveAplicarStatusSeDefensorForDerrotado() {
-    Pokesal defensor = criarPokesal("Fraco", TipoElemental.PLANTA, 1, 1, 1, 1);
-
-    Ataque ataque = criarAtaque("Veneno", 100, TipoElemental.FOGO, EfeitoStatus.ENVENENADO);
-
-    batalha.executarAtaque(ataque, fogo, defensor);
-
-    assertFalse(defensor.estaVivo());
-    assertEquals(EfeitoStatus.NENHUM, defensor.getEfeitoStatus());
-  }
-
-  @Test
-  void deveRejeitarPokesalNuloAoAplicarEfeitoDoTerreno() {
-    assertThrows(NullPointerException.class, () -> batalha.aplicarEfeitoTerrenoNoFimDoTurno(null));
-  }
-
-  @Test
-  void naoDeveAplicarEfeitoDoTerrenoEmPokesalDerrotado() {
-    Pokesal derrotado = criarPokesal("Derrotado", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    derrotado.receberDano(100);
-
-    batalha.aplicarEfeitoTerrenoNoFimDoTurno(derrotado);
-
-    assertEquals(0, derrotado.getHpAtual());
-  }
-
-  @Test
-  void deveRecuperarVidaDePlantaNoCanteiroCentral() {
-    Pokesal pokesal = criarPokesal("Planta", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    pokesal.receberDano(20);
-
-    batalha.aplicarEfeitoTerrenoNoFimDoTurno(pokesal);
-
-    assertEquals(85, pokesal.getHpAtual());
-  }
-
-  @Test
-  void naoDeveRecuperarVidaDeOutroTipoNoCanteiroCentral() {
-    Pokesal pokesal = criarPokesal("Fogo", TipoElemental.FOGO, 100, 10, 10, 10);
-
-    pokesal.receberDano(20);
-
-    batalha.aplicarEfeitoTerrenoNoFimDoTurno(pokesal);
-
-    assertEquals(80, pokesal.getHpAtual());
-  }
-
-  @Test
-  void naoDeveRecuperarVidaForaDoCanteiroCentral() {
-    Pokesal pokesal = criarPokesal("Planta", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    pokesal.receberDano(20);
-
-    new Batalha(TipoTerreno.POCA_DAGUA).aplicarEfeitoTerrenoNoFimDoTurno(pokesal);
-
-    assertEquals(80, pokesal.getHpAtual());
-  }
-
-  @Test
-  void deveAplicarDanoPeriodicoDeQueimadura() {
-    Pokesal pokesal = criarPokesal("Queimado", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    pokesal.aplicarStatus(EfeitoStatus.QUEIMADO, 2);
-
-    batalha.processarStatusNoFimDoTurno(pokesal);
-
-    assertEquals(95, pokesal.getHpAtual());
-    assertEquals(1, pokesal.getTurnosStatus());
-  }
-
-  @Test
-  void deveAplicarDanoPeriodicoDeVeneno() {
-    Pokesal pokesal = criarPokesal("Envenenado", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    pokesal.aplicarStatus(EfeitoStatus.ENVENENADO, 3);
-
-    batalha.processarStatusNoFimDoTurno(pokesal);
-
-    assertEquals(95, pokesal.getHpAtual());
-    assertEquals(2, pokesal.getTurnosStatus());
-  }
-
-  @Test
-  void paralisiaNaoDeveCausarDanoPeriodico() {
-    Pokesal pokesal = criarPokesal("Paralisado", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    pokesal.aplicarStatus(EfeitoStatus.PARALISADO, 2);
-
-    batalha.processarStatusNoFimDoTurno(pokesal);
-
-    assertEquals(100, pokesal.getHpAtual());
-    assertEquals(1, pokesal.getTurnosStatus());
-  }
-
-  @Test
-  void nenhumStatusNaoDeveCausarDanoPeriodico() {
-    Pokesal pokesal = criarPokesal("Normal", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    batalha.processarStatusNoFimDoTurno(pokesal);
-
-    assertEquals(100, pokesal.getHpAtual());
-    assertEquals(0, pokesal.getTurnosStatus());
-  }
-
-  @Test
-  void naoDeveProcessarStatusDePokesalDerrotado() {
-    Pokesal pokesal = criarPokesal("Derrotado", TipoElemental.PLANTA, 100, 10, 10, 10);
-
-    pokesal.aplicarStatus(EfeitoStatus.ENVENENADO, 3);
-    pokesal.receberDano(100);
-
-    batalha.processarStatusNoFimDoTurno(pokesal);
-
-    assertEquals(0, pokesal.getHpAtual());
-    assertEquals(3, pokesal.getTurnosStatus());
-  }
-
-  @Test
-  void deveRejeitarPokesalNuloAoProcessarStatus() {
-    assertThrows(NullPointerException.class, () -> batalha.processarStatusNoFimDoTurno(null));
-  }
-
-  @Test
-  void deveVerificarVencedorQuandoUmPokesalForDerrotado() {
-    Treinador jogador1 = new Treinador("Jogador 1", fogo);
-    Treinador jogador2 = new Treinador("Jogador 2", planta);
-
-    Batalha batalhaCompleta =
-        new Batalha(jogador1, jogador2, TipoTerreno.CANTEIRO_CENTRAL, semCritico());
-
-    planta.receberDano(planta.getHpMaximo());
-
-    assertTrue(batalhaCompleta.verificarVencedor().isPresent());
-    assertEquals(jogador1, batalhaCompleta.verificarVencedor().orElseThrow());
+  @DisplayName("O terreno é consultado uma única vez, na criação da batalha")
+  void testTerrenoConsultadoUmaVez() {
+    Batalha batalha = criarBatalha(TipoTerreno.POCA_DAGUA);
+
+    assertEquals(TipoTerreno.POCA_DAGUA, batalha.getTerreno());
+    verify(servicoTerreno, times(1)).consultar();
   }
 }
