@@ -1,8 +1,8 @@
-package enums;
+package br.com.pokesal.enums;
 
 /** Tipos elementais disponiveis */
 public enum TipoElemental {
-    FOGO,
-    AGUA,
-    PLANTA
+  FOGO,
+  AGUA,
+  PLANTA
 }
