@@ -1,11 +1,11 @@
-package torneio;
+package br.com.pokesal.torneio;
 
 import br.com.pokesal.modelo.Treinador;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import resultado.ResultadoBatalha;
+import br.com.pokesal.resultado.ResultadoBatalha;
 
 /** Torneio eliminatório com 4 ou 8 treinadores. */
 public class Torneio {

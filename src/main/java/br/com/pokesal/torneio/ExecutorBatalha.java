@@ -1,7 +1,7 @@
-package torneio;
+package br.com.pokesal.torneio;
 
 import br.com.pokesal.modelo.Treinador;
-import resultado.ResultadoBatalha;
+import br.com.pokesal.resultado.ResultadoBatalha;
 
 /** Disputa uma batalha entre dois treinadores e devolve o resultado. */
 public interface ExecutorBatalha {

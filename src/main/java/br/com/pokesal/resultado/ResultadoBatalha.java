@@ -1,4 +1,4 @@
-package resultado;
+package br.com.pokesal.resultado;
 
 /**
  * Resultado de uma batalha.

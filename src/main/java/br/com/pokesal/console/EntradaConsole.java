@@ -2,85 +2,56 @@ package br.com.pokesal.console;
 
 import java.util.Scanner;
 
-/** Responsável pela leitura e validação das entradas do terminal. */
+/** Leitura de dados digitados pelo usuário no terminal. */
 public class EntradaConsole {
-
   private final Scanner scanner;
 
   /**
-   * Cria a entrada do console.
+   * Cria a entrada.
    *
-   * @param scanner leitor de entrada
+   * @param scanner origem dos dados digitados
    */
   public EntradaConsole(Scanner scanner) {
-    if (scanner == null) {
-      throw new IllegalArgumentException("O scanner é obrigatório");
-    }
-
     this.scanner = scanner;
   }
 
   /**
-   * Lê um texto do terminal.
+   * Lê um texto que não pode ser vazio, repetindo a pergunta até receber uma resposta válida.
    *
-   * @param mensagem mensagem exibida
-   * @return texto informado
-   */
-  public String lerTexto(String mensagem) {
-    System.out.print(mensagem);
-
-    if (!scanner.hasNextLine()) {
-      throw new IllegalStateException("Não existem mais entradas disponíveis");
-    }
-
-    return scanner.nextLine();
-  }
-
-  /**
-   * Lê um texto não vazio.
-   *
-   * @param mensagem mensagem exibida
-   * @return texto válido
+   * @param mensagem pergunta exibida
+   * @return texto digitado, sem espaços nas pontas
    */
   public String lerTextoObrigatorio(String mensagem) {
     while (true) {
-      String texto = lerTexto(mensagem).trim();
-
-      if (!texto.isBlank()) {
+      System.out.print(mensagem);
+      String texto = scanner.nextLine().trim();
+      if (!texto.isEmpty()) {
         return texto;
       }
-
-      System.out.println("A entrada não pode ser vazia.");
+      System.out.println("Digite um valor.");
     }
   }
 
   /**
-   * Lê uma opção numérica dentro do intervalo informado.
+   * Lê um inteiro dentro de um intervalo, repetindo a pergunta até receber um valor válido.
    *
-   * @param mensagem mensagem exibida
-   * @param minimo valor mínimo permitido
-   * @param maximo valor máximo permitido
-   * @return opção validada
+   * @param mensagem pergunta exibida
+   * @param minimo menor valor aceito
+   * @param maximo maior valor aceito
+   * @return número digitado
    */
   public int lerOpcao(String mensagem, int minimo, int maximo) {
-    if (minimo > maximo) {
-      throw new IllegalArgumentException("O intervalo de opções é inválido");
-    }
-
     while (true) {
-      String entrada = lerTexto(mensagem).trim();
-
+      System.out.print(mensagem);
       try {
-        int opcao = Integer.parseInt(entrada);
-
-        if (opcao >= minimo && opcao <= maximo) {
-          return opcao;
+        int valor = Integer.parseInt(scanner.nextLine().trim());
+        if (valor >= minimo && valor <= maximo) {
+          return valor;
         }
-
-        System.out.println("Opção fora do intervalo permitido.");
-      } catch (NumberFormatException excecao) {
-        System.out.println("Digite uma opção numérica válida.");
+      } catch (NumberFormatException e) {
+        // Entrada inválida: a pergunta é repetida abaixo.
       }
+      System.out.println("Escolha um número entre " + minimo + " e " + maximo + ".");
     }
   }
 }

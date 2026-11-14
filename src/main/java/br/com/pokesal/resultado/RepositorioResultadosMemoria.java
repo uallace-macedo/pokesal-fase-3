@@ -1,4 +1,4 @@
-package resultado;
+package br.com.pokesal.resultado;
 
 import java.util.ArrayList;
 import java.util.List;

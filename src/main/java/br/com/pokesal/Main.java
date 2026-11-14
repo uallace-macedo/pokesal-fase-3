@@ -11,7 +11,7 @@ public class Main {
    * @param args argumentos recebidos pela linha de comando
    */
   public static void main(String[] args) {
-    InterfaceConsole console = new InterfaceConsole();
-    console.iniciar();
+    // InterfaceConsole console = new InterfaceConsole();
+    // console.iniciar();
   }
 }
