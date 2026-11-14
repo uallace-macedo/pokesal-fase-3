@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import br.com.pokesal.enums.EfeitoStatus;
-import br.com.pokesal.enums.Terreno;
+import br.com.pokesal.enums.TipoTerreno;
 import br.com.pokesal.enums.TipoElemental;
 import br.com.pokesal.modelo.Ataque;
 import br.com.pokesal.modelo.Pokesal;
@@ -25,7 +25,7 @@ class BatalhaTest {
 
   @BeforeEach
   void setUp() {
-    batalha = new Batalha(Terreno.CANTEIRO_CENTRAL, semCritico());
+    batalha = new Batalha(TipoTerreno.CANTEIRO_CENTRAL, semCritico());
     planta = criarPokesal("BulbaSal", TipoElemental.PLANTA, 110, 45, 50, 40);
     fogo = criarPokesal("CharSal", TipoElemental.FOGO, 95, 55, 35, 55);
     agua = criarPokesal("SquirtSal", TipoElemental.AGUA, 105, 40, 55, 35);
@@ -67,7 +67,7 @@ class BatalhaTest {
 
   @Test
   void deveRetornarTerrenoDaBatalha() {
-    assertEquals(Terreno.CANTEIRO_CENTRAL, batalha.getTerreno());
+    assertEquals(TipoTerreno.CANTEIRO_CENTRAL, batalha.getTerreno());
   }
 
   @Test
@@ -77,7 +77,7 @@ class BatalhaTest {
 
   @Test
   void deveRejeitarGeradorAleatorioNulo() {
-    assertThrows(NullPointerException.class, () -> new Batalha(Terreno.ASFALTO_QUENTE, null));
+    assertThrows(NullPointerException.class, () -> new Batalha(TipoTerreno.ASFALTO_QUENTE, null));
   }
 
   @Test
@@ -126,14 +126,14 @@ class BatalhaTest {
 
   @Test
   void deveAplicarBonusDeFogoNoAsfaltoQuente() {
-    Batalha batalhaAsfalto = new Batalha(Terreno.ASFALTO_QUENTE);
+    Batalha batalhaAsfalto = new Batalha(TipoTerreno.ASFALTO_QUENTE);
 
     assertEquals(1.15, batalhaAsfalto.calcularMultiplicadorTerreno(TipoElemental.FOGO));
   }
 
   @Test
   void deveAplicarBonusDeAguaNaPocaDagua() {
-    Batalha batalhaPoca = new Batalha(Terreno.POCA_DAGUA);
+    Batalha batalhaPoca = new Batalha(TipoTerreno.POCA_DAGUA);
 
     assertEquals(1.10, batalhaPoca.calcularMultiplicadorTerreno(TipoElemental.AGUA));
   }
@@ -141,14 +141,14 @@ class BatalhaTest {
   @Test
   void naoDeveAplicarBonusQuandoTipoNaoCombinaComTerreno() {
     assertEquals(
-        1.0, new Batalha(Terreno.ASFALTO_QUENTE).calcularMultiplicadorTerreno(TipoElemental.AGUA));
+        1.0, new Batalha(TipoTerreno.ASFALTO_QUENTE).calcularMultiplicadorTerreno(TipoElemental.AGUA));
 
     assertEquals(
-        1.0, new Batalha(Terreno.POCA_DAGUA).calcularMultiplicadorTerreno(TipoElemental.FOGO));
+        1.0, new Batalha(TipoTerreno.POCA_DAGUA).calcularMultiplicadorTerreno(TipoElemental.FOGO));
 
     assertEquals(
         1.0,
-        new Batalha(Terreno.CANTEIRO_CENTRAL).calcularMultiplicadorTerreno(TipoElemental.PLANTA));
+        new Batalha(TipoTerreno.CANTEIRO_CENTRAL).calcularMultiplicadorTerreno(TipoElemental.PLANTA));
   }
 
   @Test
@@ -165,7 +165,7 @@ class BatalhaTest {
 
     assertEquals(
         1,
-        new Batalha(Terreno.CANTEIRO_CENTRAL, semCritico())
+        new Batalha(TipoTerreno.CANTEIRO_CENTRAL, semCritico())
             .calcularDano(ataque, atacante, defensor));
   }
 
@@ -174,7 +174,7 @@ class BatalhaTest {
     Ataque ataque = criarAtaque("Brasas", 25, TipoElemental.FOGO, EfeitoStatus.NENHUM);
 
     assertEquals(
-        60, new Batalha(Terreno.CANTEIRO_CENTRAL, semCritico()).calcularDano(ataque, fogo, planta));
+        60, new Batalha(TipoTerreno.CANTEIRO_CENTRAL, semCritico()).calcularDano(ataque, fogo, planta));
   }
 
   @Test
@@ -187,7 +187,7 @@ class BatalhaTest {
 
     assertEquals(
         30,
-        new Batalha(Terreno.CANTEIRO_CENTRAL, comCritico())
+        new Batalha(TipoTerreno.CANTEIRO_CENTRAL, comCritico())
             .calcularDano(ataque, atacante, defensor));
   }
 
@@ -201,7 +201,7 @@ class BatalhaTest {
 
     assertEquals(
         20,
-        new Batalha(Terreno.ASFALTO_QUENTE, semCritico())
+        new Batalha(TipoTerreno.ASFALTO_QUENTE, semCritico())
             .calcularDano(investida, atacante, defensor));
   }
 
@@ -365,7 +365,7 @@ class BatalhaTest {
 
     pokesal.receberDano(20);
 
-    new Batalha(Terreno.POCA_DAGUA).aplicarEfeitoTerrenoNoFimDoTurno(pokesal);
+    new Batalha(TipoTerreno.POCA_DAGUA).aplicarEfeitoTerrenoNoFimDoTurno(pokesal);
 
     assertEquals(80, pokesal.getHpAtual());
   }
@@ -440,7 +440,7 @@ class BatalhaTest {
     Treinador jogador2 = new Treinador("Jogador 2", planta);
 
     Batalha batalhaCompleta =
-        new Batalha(jogador1, jogador2, Terreno.CANTEIRO_CENTRAL, semCritico());
+        new Batalha(jogador1, jogador2, TipoTerreno.CANTEIRO_CENTRAL, semCritico());
 
     planta.receberDano(planta.getHpMaximo());
 

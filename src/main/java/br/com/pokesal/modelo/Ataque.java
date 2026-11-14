@@ -3,90 +3,36 @@ package br.com.pokesal.modelo;
 import br.com.pokesal.enums.EfeitoStatus;
 import br.com.pokesal.enums.TipoElemental;
 
-/** Representa os ataques disponíveis para os pokesal */
-public class Ataque {
+/**
+ * Golpe que um Pokésal pode executar.
+ *
+ * @param nome nome do golpe
+ * @param tipo tipo elemental do golpe
+ * @param danoBase dano base do golpe, maior ou igual a zero
+ * @param precisao chance de acerto, de 0 a 100
+ * @param efeitoStatus efeito aplicado ao alvo quando o golpe acerta, ou {@code NENHUM}
+ */
+public record Ataque(
+        String nome, TipoElemental tipo, int danoBase, int precisao, EfeitoStatus efeitoStatus) {
 
-  private final String nome;
-  private final TipoElemental tipo;
-  private final int danoBase;
-  private final EfeitoStatus efeitoStatus;
-  private final boolean elemental;
+  /** Precisão mínima aceita. */
+  public static final int PRECISAO_MINIMA = 0;
 
-  /**
-   * Cria um ataque elemental com seus atributos.
-   *
-   * @param nome nome do ataque
-   * @param tipo tipo elemental do ataque
-   * @param danoBase dano base do ataque
-   * @param efeitoStatus efeito de status aplicado pelo ataque
-   */
-  public Ataque(String nome, TipoElemental tipo, int danoBase, EfeitoStatus efeitoStatus) {
-    this(nome, tipo, danoBase, efeitoStatus, true);
-  }
+  /** Precisão máxima aceita. */
+  public static final int PRECISAO_MAXIMA = 100;
 
   /**
-   * Cria um ataque com controle sobre sua natureza elemental.
+   * Valida os dados do golpe.
    *
-   * @param nome nome do ataque
-   * @param tipo tipo elemental do ataque
-   * @param danoBase dano base do ataque
-   * @param efeitoStatus efeito de status aplicado pelo ataque
-   * @param elemental indica se o ataque recebe multiplicadores elementais e de terreno
+   * @throws IllegalArgumentException se o dano base for negativo ou a precisão estiver fora de 0 a
+   *     100
    */
-  public Ataque(
-      String nome, TipoElemental tipo, int danoBase, EfeitoStatus efeitoStatus, boolean elemental) {
-
-    if (nome == null || nome.isBlank()) {
-      throw new IllegalArgumentException("O nome do ataque não pode ser vazio");
-    }
-
-    if (tipo == null || efeitoStatus == null) {
-      throw new IllegalArgumentException("Tipo e efeito de status são obrigatórios");
-    }
-
+  public Ataque {
     if (danoBase < 0) {
-      throw new IllegalArgumentException("O dano base não pode ser negativo");
+      throw new IllegalArgumentException("O dano base não pode ser negativo.");
     }
-
-    this.nome = nome;
-    this.tipo = tipo;
-    this.danoBase = danoBase;
-    this.efeitoStatus = efeitoStatus;
-    this.elemental = elemental;
-  }
-
-  /**
-   * @return nome do ataque
-   */
-  public String getNome() {
-    return nome;
-  }
-
-  /**
-   * @return tipo elemental do ataque
-   */
-  public TipoElemental getTipo() {
-    return tipo;
-  }
-
-  /**
-   * @return dano base do ataque
-   */
-  public int getDanoBase() {
-    return danoBase;
-  }
-
-  /**
-   * @return efeito de status do ataque
-   */
-  public EfeitoStatus getEfeitoStatus() {
-    return efeitoStatus;
-  }
-
-  /**
-   * @return true se o ataque recebe multiplicadores elementais e de terreno
-   */
-  public boolean isElemental() {
-    return elemental;
+    if (precisao < PRECISAO_MINIMA || precisao > PRECISAO_MAXIMA) {
+      throw new IllegalArgumentException("A precisão deve estar entre 0 e 100.");
+    }
   }
 }

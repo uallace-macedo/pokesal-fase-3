@@ -1,7 +1,7 @@
 package br.com.pokesal.batalha;
 
 import br.com.pokesal.enums.EfeitoStatus;
-import br.com.pokesal.enums.Terreno;
+import br.com.pokesal.enums.TipoTerreno;
 import br.com.pokesal.enums.TipoElemental;
 import br.com.pokesal.modelo.Ataque;
 import br.com.pokesal.modelo.Pokesal;
@@ -28,26 +28,26 @@ public class Batalha {
 
   private final Treinador treinador1;
   private final Treinador treinador2;
-  private final Terreno terreno;
+  private final TipoTerreno tipoTerreno;
   private final Random random;
 
   /**
    * Cria uma batalha sem participantes definidos.
    *
-   * @param terreno terreno da batalha
+   * @param tipoTerreno terreno da batalha
    */
-  public Batalha(Terreno terreno) {
-    this(terreno, new Random());
+  public Batalha(TipoTerreno tipoTerreno) {
+    this(tipoTerreno, new Random());
   }
 
   /**
    * Cria uma batalha sem participantes definidos.
    *
-   * @param terreno terreno da batalha
+   * @param tipoTerreno terreno da batalha
    * @param random gerador aleatório
    */
-  public Batalha(Terreno terreno, Random random) {
-    this(terreno, random, null, null);
+  public Batalha(TipoTerreno tipoTerreno, Random random) {
+    this(tipoTerreno, random, null, null);
   }
 
   /**
@@ -55,10 +55,10 @@ public class Batalha {
    *
    * @param treinador1 primeiro treinador
    * @param treinador2 segundo treinador
-   * @param terreno terreno da batalha
+   * @param tipoTerreno terreno da batalha
    */
-  public Batalha(Treinador treinador1, Treinador treinador2, Terreno terreno) {
-    this(treinador1, treinador2, terreno, new Random());
+  public Batalha(Treinador treinador1, Treinador treinador2, TipoTerreno tipoTerreno) {
+    this(treinador1, treinador2, tipoTerreno, new Random());
   }
 
   /**
@@ -66,26 +66,26 @@ public class Batalha {
    *
    * @param treinador1 primeiro treinador
    * @param treinador2 segundo treinador
-   * @param terreno terreno da batalha
+   * @param tipoTerreno terreno da batalha
    * @param random gerador aleatório
    */
-  public Batalha(Treinador treinador1, Treinador treinador2, Terreno terreno, Random random) {
+  public Batalha(Treinador treinador1, Treinador treinador2, TipoTerreno tipoTerreno, Random random) {
     this(
-        terreno,
+            tipoTerreno,
         random,
         Objects.requireNonNull(treinador1, "O primeiro treinador é obrigatório"),
         Objects.requireNonNull(treinador2, "O segundo treinador é obrigatório"));
   }
 
-  private Batalha(Terreno terreno, Random random, Treinador treinador1, Treinador treinador2) {
-    this.terreno = Objects.requireNonNull(terreno, "O terreno é obrigatório");
+  private Batalha(TipoTerreno tipoTerreno, Random random, Treinador treinador1, Treinador treinador2) {
+    this.tipoTerreno = Objects.requireNonNull(tipoTerreno, "O terreno é obrigatório");
     this.random = Objects.requireNonNull(random, "O gerador aleatório é obrigatório");
     this.treinador1 = treinador1;
     this.treinador2 = treinador2;
   }
 
-  public Terreno getTerreno() {
-    return terreno;
+  public TipoTerreno getTerreno() {
+    return tipoTerreno;
   }
 
   /**
@@ -121,11 +121,11 @@ public class Batalha {
   public double calcularMultiplicadorTerreno(TipoElemental tipoAtaque) {
     Objects.requireNonNull(tipoAtaque, "O tipo de ataque é obrigatório");
 
-    if (terreno == Terreno.ASFALTO_QUENTE && tipoAtaque == TipoElemental.FOGO) {
+    if (tipoTerreno == TipoTerreno.ASFALTO_QUENTE && tipoAtaque == TipoElemental.FOGO) {
       return MULTIPLICADOR_ASFALTO_QUENTE;
     }
 
-    if (terreno == Terreno.POCA_DAGUA && tipoAtaque == TipoElemental.AGUA) {
+    if (tipoTerreno == TipoTerreno.POCA_DAGUA && tipoAtaque == TipoElemental.AGUA) {
       return MULTIPLICADOR_POCA_DAGUA;
     }
 
@@ -242,7 +242,7 @@ public class Batalha {
       return;
     }
 
-    if (terreno == Terreno.CANTEIRO_CENTRAL && pokesal.getTipo() == TipoElemental.PLANTA) {
+    if (tipoTerreno == TipoTerreno.CANTEIRO_CENTRAL && pokesal.getTipo() == TipoElemental.PLANTA) {
 
       int recuperacao = (int) Math.round(pokesal.getHpMaximo() * RECUPERACAO_CANTEIRO);
 

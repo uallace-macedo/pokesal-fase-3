@@ -3,15 +3,9 @@ package br.com.pokesal.modelo;
 import br.com.pokesal.enums.EfeitoStatus;
 import br.com.pokesal.enums.TipoElemental;
 import java.util.List;
-import java.util.Objects;
 
-/** Representa um pokesal e seus atributos durante uma batalha. */
+/** Pokésal em batalha, com atributos, golpes e efeito de status atual. */
 public class Pokesal {
-
-  private static final int VALOR_MINIMO = 0;
-  private static final int REDUCAO_ATAQUE_QUEIMADO = 5;
-  private static final int REDUCAO_VELOCIDADE_PARALISADO = 10;
-
   private final String nome;
   private final TipoElemental tipo;
   private final int hpMaximo;
@@ -19,203 +13,106 @@ public class Pokesal {
   private final int defesa;
   private final int velocidade;
   private final List<Ataque> ataques;
-
   private int hpAtual;
-  private EfeitoStatus efeitoStatus;
+  private EfeitoStatus efeitoStatus = EfeitoStatus.NENHUM;
   private int turnosStatus;
 
   /**
-   * Cria um pokesal com seus atributos e ataques.
+   * Cria um Pokésal com HP cheio e sem efeito de status.
    *
-   * @param nome nome do pokesal
+   * @param nome nome do Pokésal
    * @param tipo tipo elemental
-   * @param hpMaximo pontos de vida máximos
-   * @param ataque atributo de ataque
-   * @param defesa atributo de defesa
-   * @param velocidade atributo de velocidade
-   * @param ataques lista de ataques disponíveis
+   * @param hpMaximo pontos de vida máximos, maiores que zero
+   * @param ataque atributo ATK, maior ou igual a zero
+   * @param defesa atributo DEF, maior ou igual a zero
+   * @param velocidade atributo SPD, maior ou igual a zero
+   * @param ataques golpes disponíveis
+   * @throws IllegalArgumentException se algum atributo for inválido
    */
   public Pokesal(
-      String nome,
-      TipoElemental tipo,
-      int hpMaximo,
-      int ataque,
-      int defesa,
-      int velocidade,
-      List<Ataque> ataques) {
-
-    if (nome == null || nome.isBlank()) {
-      throw new IllegalArgumentException("O nome não pode ser vazio");
+          String nome,
+          TipoElemental tipo,
+          int hpMaximo,
+          int ataque,
+          int defesa,
+          int velocidade,
+          List<Ataque> ataques) {
+    if (hpMaximo <= 0) {
+      throw new IllegalArgumentException("O HP máximo deve ser maior que zero.");
     }
-
-    if (tipo == null || ataques == null) {
-      throw new IllegalArgumentException("Tipo e ataques são obrigatórios");
+    if (ataque < 0 || defesa < 0 || velocidade < 0) {
+      throw new IllegalArgumentException("ATK, DEF e SPD não podem ser negativos.");
     }
-
-    if (hpMaximo <= VALOR_MINIMO
-        || ataque < VALOR_MINIMO
-        || defesa < VALOR_MINIMO
-        || velocidade < VALOR_MINIMO) {
-      throw new IllegalArgumentException("Os atributos do pokesal são inválidos");
-    }
-
-    if (ataques.size() != 3) {
-      throw new IllegalArgumentException("O pokesal deve possuir exatamente três ataques válidos");
-    }
-
-    if (ataques.stream().anyMatch(Objects::isNull)) {
-      throw new IllegalArgumentException("A lista de ataques não pode conter valores nulos");
-    }
-
     this.nome = nome;
     this.tipo = tipo;
     this.hpMaximo = hpMaximo;
+    this.hpAtual = hpMaximo;
     this.ataque = ataque;
     this.defesa = defesa;
     this.velocidade = velocidade;
     this.ataques = List.copyOf(ataques);
-
-    this.hpAtual = hpMaximo;
-    this.efeitoStatus = EfeitoStatus.NENHUM;
-    this.turnosStatus = VALOR_MINIMO;
-  }
-
-  public String getNome() {
-    return nome;
-  }
-
-  public TipoElemental getTipo() {
-    return tipo;
-  }
-
-  public int getHpMaximo() {
-    return hpMaximo;
-  }
-
-  public int getHpAtual() {
-    return hpAtual;
-  }
-
-  public int getAtaque() {
-    return ataque;
   }
 
   /**
-   * Retorna o ataque considerando o efeito de status atual.
+   * Reduz o HP atual. O HP nunca fica abaixo de zero.
    *
-   * @return ataque efetivo
-   */
-  public int getAtaqueEfetivo() {
-    if (efeitoStatus == EfeitoStatus.QUEIMADO) {
-      return Math.max(VALOR_MINIMO, ataque - REDUCAO_ATAQUE_QUEIMADO);
-    }
-
-    return ataque;
-  }
-
-  public int getDefesa() {
-    return defesa;
-  }
-
-  public int getVelocidade() {
-    return velocidade;
-  }
-
-  /**
-   * Retorna a velocidade considerando o efeito de status atual.
-   *
-   * @return velocidade efetiva
-   */
-  public int getVelocidadeEfetiva() {
-    if (efeitoStatus == EfeitoStatus.PARALISADO) {
-      return Math.max(VALOR_MINIMO, velocidade - REDUCAO_VELOCIDADE_PARALISADO);
-    }
-
-    return velocidade;
-  }
-
-  public List<Ataque> getAtaques() {
-    return ataques;
-  }
-
-  public EfeitoStatus getEfeitoStatus() {
-    return efeitoStatus;
-  }
-
-  public int getTurnosStatus() {
-    return turnosStatus;
-  }
-
-  public boolean estaVivo() {
-    return hpAtual > VALOR_MINIMO;
-  }
-
-  /**
-   * Aplica dano sem permitir que o HP fique negativo.
-   *
-   * @param dano quantidade de dano
+   * @param dano dano recebido, maior ou igual a zero
+   * @throws IllegalArgumentException se o dano for negativo
    */
   public void receberDano(int dano) {
-    if (dano < VALOR_MINIMO) {
-      throw new IllegalArgumentException("O dano não pode ser negativo");
+    if (dano < 0) {
+      throw new IllegalArgumentException("O dano não pode ser negativo.");
     }
-
-    if (dano >= hpAtual) {
-      hpAtual = VALOR_MINIMO;
-      return;
-    }
-
-    hpAtual -= dano;
+    hpAtual = Math.max(0, hpAtual - dano);
   }
 
   /**
-   * Recupera HP sem ultrapassar o máximo e sem risco de overflow.
+   * Recupera HP. O HP nunca ultrapassa o máximo e um Pokésal derrotado não recupera vida.
    *
-   * @param quantidade quantidade de HP recuperado
+   * @param valor quantidade recuperada, maior ou igual a zero
+   * @throws IllegalArgumentException se o valor for negativo
    */
-  public void recuperarVida(int quantidade) {
-    if (quantidade < VALOR_MINIMO) {
-      throw new IllegalArgumentException("A recuperação não pode ser negativa");
+  public void recuperarVida(int valor) {
+    if (valor < 0) {
+      throw new IllegalArgumentException("A cura não pode ser negativa.");
     }
-
-    if (quantidade >= hpMaximo - hpAtual) {
-      hpAtual = hpMaximo;
-      return;
+    if (estaVivo()) {
+      hpAtual = Math.min(hpMaximo, hpAtual + valor);
     }
-
-    hpAtual += quantidade;
   }
 
   /**
-   * Aplica um efeito de status se o pokesal não possuir outro ativo.
+   * Indica se o Pokésal ainda pode lutar.
    *
-   * @param efeito efeito a aplicar
-   * @param duracao duração em turnos
-   * @return true se o efeito foi aplicado
+   * @return {@code true} se o HP atual for maior que zero
    */
-  public boolean aplicarStatus(EfeitoStatus efeito, int duracao) {
-    if (efeito == null || efeito == EfeitoStatus.NENHUM || duracao <= VALOR_MINIMO) {
-      throw new IllegalArgumentException("O efeito e a duração são inválidos");
-    }
+  public boolean estaVivo() {
+    return hpAtual > 0;
+  }
 
-    if (efeitoStatus != EfeitoStatus.NENHUM) {
+  /**
+   * Aplica um efeito de status. Efeitos não se acumulam.
+   *
+   * @param novoEfeito efeito a aplicar
+   * @return {@code true} se o efeito foi aplicado; {@code false} se já havia outro efeito ou se o
+   *     efeito era {@code NENHUM}
+   */
+  public boolean aplicarStatus(EfeitoStatus novoEfeito) {
+    if (novoEfeito == EfeitoStatus.NENHUM || efeitoStatus != EfeitoStatus.NENHUM) {
       return false;
     }
-
-    efeitoStatus = efeito;
-    turnosStatus = duracao;
+    efeitoStatus = novoEfeito;
+    turnosStatus = novoEfeito.getDuracao();
     return true;
   }
 
-  /** Reduz a duração do status e o remove quando termina. */
+  /** Consome um turno do efeito de status e o remove quando a duração termina. */
   public void avancarTurnoStatus() {
     if (efeitoStatus == EfeitoStatus.NENHUM) {
       return;
     }
-
     turnosStatus--;
-
-    if (turnosStatus <= VALOR_MINIMO) {
+    if (turnosStatus <= 0) {
       removerStatus();
     }
   }
@@ -223,6 +120,102 @@ public class Pokesal {
   /** Remove o efeito de status atual. */
   public void removerStatus() {
     efeitoStatus = EfeitoStatus.NENHUM;
-    turnosStatus = VALOR_MINIMO;
+    turnosStatus = 0;
+  }
+
+  /** Devolve HP máximo e remove o efeito de status, para uma nova batalha. */
+  public void restaurar() {
+    hpAtual = hpMaximo;
+    removerStatus();
+  }
+
+  /**
+   * Retorna o ataque considerando o efeito de status.
+   *
+   * @return ATK menos a redução do efeito, nunca abaixo de zero
+   */
+  public int getAtaqueEfetivo() {
+    return Math.max(0, ataque - efeitoStatus.getReducaoAtaque());
+  }
+
+  /**
+   * Retorna a velocidade considerando o efeito de status.
+   *
+   * @return SPD menos a redução do efeito, nunca abaixo de zero
+   */
+  public int getVelocidadeEfetiva() {
+    return Math.max(0, velocidade - efeitoStatus.getReducaoVelocidade());
+  }
+
+  /**
+   * Retorna o nome.
+   *
+   * @return nome do Pokésal
+   */
+  public String getNome() {
+    return nome;
+  }
+
+  /**
+   * Retorna o tipo elemental.
+   *
+   * @return tipo do Pokésal
+   */
+  public TipoElemental getTipo() {
+    return tipo;
+  }
+
+  /**
+   * Retorna o HP máximo.
+   *
+   * @return HP máximo
+   */
+  public int getHpMaximo() {
+    return hpMaximo;
+  }
+
+  /**
+   * Retorna o HP atual.
+   *
+   * @return HP atual
+   */
+  public int getHpAtual() {
+    return hpAtual;
+  }
+
+  /**
+   * Retorna a defesa.
+   *
+   * @return atributo DEF
+   */
+  public int getDefesa() {
+    return defesa;
+  }
+
+  /**
+   * Retorna os golpes.
+   *
+   * @return lista imutável de golpes
+   */
+  public List<Ataque> getAtaques() {
+    return ataques;
+  }
+
+  /**
+   * Retorna o efeito de status atual.
+   *
+   * @return efeito atual, ou {@code NENHUM}
+   */
+  public EfeitoStatus getEfeitoStatus() {
+    return efeitoStatus;
+  }
+
+  /**
+   * Retorna os turnos restantes do efeito de status.
+   *
+   * @return turnos restantes, ou zero se não há efeito
+   */
+  public int getTurnosStatus() {
+    return turnosStatus;
   }
 }

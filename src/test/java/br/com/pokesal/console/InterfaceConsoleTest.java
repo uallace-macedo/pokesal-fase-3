@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import br.com.pokesal.batalha.Batalha;
 import br.com.pokesal.catalogo.CatalogoPokesal;
 import br.com.pokesal.enums.EfeitoStatus;
-import br.com.pokesal.enums.Terreno;
+import br.com.pokesal.enums.TipoTerreno;
 import br.com.pokesal.enums.TipoItem;
 import br.com.pokesal.modelo.Pokesal;
 import br.com.pokesal.modelo.Treinador;
@@ -84,7 +84,7 @@ class InterfaceConsoleTest {
 
     jogador1.getPokesal().receberDano(Integer.MAX_VALUE);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     assertDoesNotThrow(
         () ->
@@ -105,7 +105,7 @@ class InterfaceConsoleTest {
 
     jogador2.getPokesal().receberDano(Integer.MAX_VALUE);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     assertDoesNotThrow(
         () ->
@@ -124,7 +124,7 @@ class InterfaceConsoleTest {
     Treinador atacante = criarTreinador("Ash", 0);
     Treinador defensor = criarTreinador("Misty", 1);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     assertDoesNotThrow(
         () ->
@@ -143,7 +143,7 @@ class InterfaceConsoleTest {
     Treinador atacante = criarTreinador("Ash", 0);
     Treinador defensor = criarTreinador("Misty", 1);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     int hpInicial = defensor.getPokesal().getHpAtual();
 
@@ -267,7 +267,7 @@ class InterfaceConsoleTest {
 
     pokesal.aplicarStatus(EfeitoStatus.QUEIMADO, 2);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     int hpInicial = pokesal.getHpAtual();
 
@@ -288,7 +288,7 @@ class InterfaceConsoleTest {
 
     pokesal.aplicarStatus(EfeitoStatus.ENVENENADO, 3);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     int hpInicial = pokesal.getHpAtual();
 
@@ -309,7 +309,7 @@ class InterfaceConsoleTest {
 
     pokesal.aplicarStatus(EfeitoStatus.PARALISADO, 2);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     assertDoesNotThrow(
         () ->
@@ -328,7 +328,7 @@ class InterfaceConsoleTest {
 
     pokesal.receberDano(Integer.MAX_VALUE);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     assertDoesNotThrow(
         () ->
@@ -369,7 +369,7 @@ class InterfaceConsoleTest {
 
     jogador.getPokesal().receberDano(30);
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     invocar(
         console,
@@ -393,7 +393,7 @@ class InterfaceConsoleTest {
 
     int hpInicialAdversario = adversario.getPokesal().getHpAtual();
 
-    Batalha batalha = new Batalha(Terreno.ASFALTO_QUENTE, new Random(42));
+    Batalha batalha = new Batalha(TipoTerreno.ASFALTO_QUENTE, new Random(42));
 
     invocar(
         console,

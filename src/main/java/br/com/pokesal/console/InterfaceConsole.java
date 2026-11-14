@@ -2,7 +2,7 @@ package br.com.pokesal.console;
 
 import br.com.pokesal.batalha.Batalha;
 import br.com.pokesal.catalogo.CatalogoPokesal;
-import br.com.pokesal.enums.Terreno;
+import br.com.pokesal.enums.TipoTerreno;
 import br.com.pokesal.enums.TipoItem;
 import br.com.pokesal.modelo.Ataque;
 import br.com.pokesal.modelo.Item;
@@ -64,13 +64,13 @@ public class InterfaceConsole {
     treinador1 = selecionarTreinador(PRIMEIRA_OPCAO);
     treinador2 = selecionarTreinador(2);
 
-    Terreno[] terrenos = Terreno.values();
-    Terreno terreno = terrenos[random.nextInt(terrenos.length)];
+    TipoTerreno[] tipoTerrenos = TipoTerreno.values();
+    TipoTerreno tipoTerreno = tipoTerrenos[random.nextInt(tipoTerrenos.length)];
 
     System.out.println();
-    System.out.println("Terreno escolhido: " + terreno);
+    System.out.println("Terreno escolhido: " + tipoTerreno);
 
-    Batalha batalha = new Batalha(treinador1, treinador2, terreno, random);
+    Batalha batalha = new Batalha(treinador1, treinador2, tipoTerreno, random);
 
     executarBatalha(batalha);
   }

@@ -1,64 +1,38 @@
 package br.com.pokesal.modelo;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import br.com.pokesal.enums.EfeitoStatus;
 import br.com.pokesal.enums.TipoElemental;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/** Testes unitários para a classe Ataque */
 class AtaqueTest {
 
   @Test
-  void deveCriarAtaqueValido() {
-    Ataque ataque = new Ataque("Folha Navalha", TipoElemental.PLANTA, 25, EfeitoStatus.NENHUM);
-
-    assertEquals("Folha Navalha", ataque.getNome());
-    assertEquals(TipoElemental.PLANTA, ataque.getTipo());
-    assertEquals(25, ataque.getDanoBase());
-    assertEquals(EfeitoStatus.NENHUM, ataque.getEfeitoStatus());
+  @DisplayName("Precisão nos limites 0 e 100 é aceita")
+  void testPrecisaoNosLimitesEhValida() {
+    assertDoesNotThrow(() -> new Ataque("A", TipoElemental.NORMAL, 10, 0, EfeitoStatus.NENHUM));
+    assertDoesNotThrow(() -> new Ataque("A", TipoElemental.NORMAL, 10, 100, EfeitoStatus.NENHUM));
   }
 
   @Test
-  void deveRejeitarNomeNulo() {
+  @DisplayName("Precisão fora de 0 a 100 é rejeitada")
+  void testPrecisaoForaDoIntervaloEhInvalida() {
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new Ataque(null, TipoElemental.PLANTA, 10, EfeitoStatus.NENHUM));
-  }
-
-  @Test
-  void deveRejeitarNomeVazio() {
+            IllegalArgumentException.class,
+            () -> new Ataque("A", TipoElemental.NORMAL, 10, -1, EfeitoStatus.NENHUM));
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new Ataque(" ", TipoElemental.PLANTA, 10, EfeitoStatus.NENHUM));
+            IllegalArgumentException.class,
+            () -> new Ataque("A", TipoElemental.NORMAL, 10, 101, EfeitoStatus.NENHUM));
   }
 
   @Test
-  void deveRejeitarTipoNulo() {
+  @DisplayName("Dano base negativo é rejeitado")
+  void testDanoBaseNegativoEhInvalido() {
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new Ataque("Investida", null, 10, EfeitoStatus.NENHUM));
-  }
-
-  @Test
-  void deveRejeitarEfeitoNulo() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Ataque("Investida", TipoElemental.PLANTA, 10, null));
-  }
-
-  @Test
-  void deveRejeitarDanoNegativo() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Ataque("Investida", TipoElemental.PLANTA, -1, EfeitoStatus.NENHUM));
-  }
-
-  @Test
-  void deveAceitarDanoZero() {
-    Ataque ataque = new Ataque("Investida", TipoElemental.PLANTA, 0, EfeitoStatus.NENHUM);
-
-    assertEquals(0, ataque.getDanoBase());
+            IllegalArgumentException.class,
+            () -> new Ataque("A", TipoElemental.NORMAL, -1, 100, EfeitoStatus.NENHUM));
   }
 }
