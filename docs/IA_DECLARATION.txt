@@ -1,0 +1,124 @@
+eu quero fazer quantos commits necessarios para fazer de todos as classes que estão em verde
+
+Para organizar os 5 ficheiros em verde, o ideal é fazer 2 commits separados por funcionalidade (em duas branches diferentes, para não misturar assuntos no mesmo Pull Request):   
+image_0046bd.png
+
+Commit 1 (Treinador e Itens): TipoItem.java, Item.java e Treinador.java.   
+image_0046bd.png
+
+Commit 2 (Torneio): ExecutorBatalha.java e Torneio.java.   
+image_0046bd.png
+
+Antes de rodar os comandos (2 verificações rápidas)
+Salva todos os ficheiros no IntelliJ: Aperta Ctrl + Shift + S para garantir que o código dentro deles não vai vazio.
+
+Confere a pasta de Item e Treinador: Na tua estrutura atual, Item.java e Treinador.java estão dentro da pasta resultado. Se o teu grupo definiu que eles devem ficar em modelo (junto com Pokesal e Ataque), arrasta-os para modelo agora e atualiza a primeira linha deles para package br.com.pokesal.modelo;.   
+image_0046bd.png
++ 1
+
+Passo a Passo: Commit 1 (Treinador e Itens)
+No terminal (lembra-te de colar usando botão direito do rato -> Paste), executa um comando de cada vez:
+
+Bash
+# 1. Garante que partes da branch development limpa
+git checkout development
+
+# 2. Cria a branch para treinador e itens
+git checkout -b feat/treinador-e-itens
+
+# 3. Adiciona apenas os 3 ficheiros desta entrega
+git add src/main/java/br/com/pokesal/enums/TipoItem.java src/main/java/br/com/pokesal/resultado/Item.java src/main/java/br/com/pokesal/resultado/Treinador.java
+
+# 4. Faz o commit
+git commit -m "feat(modelo): adiciona treinador, item e tipo de item"
+
+# 5. Envia para o GitHub
+git push -u origin feat/treinador-e-itens
+(Nota: se tiveres movido Item.java e Treinador.java para a pasta modelo, troca resultado por modelo no comando git add acima).
+
+Passo a Passo: Commit 2 (Torneio)
+Seguindo o padrão do Commit 6 do cronograma do projeto, volta para a development para que esta nova branch leve apenas os ficheiros do torneio:   
+plano-de-commits (1).pdf
++ 2
+
+Bash
+# 1. Volta para a development para não misturar com o commit anterior
+git checkout development
+
+# 2. Cria a branch oficial do torneio
+git checkout -b feature/torneio
+
+# 3. Adiciona a pasta inteira do torneio (ExecutorBatalha e Torneio)
+git add src/main/java/br/com/pokesal/torneio/
+
+# 4. Faz o commit padronizado
+git commit -m "feat(torneio): adiciona chaveamento eliminatório com 4 ou 8 treinadores"
+
+# 5. Envia para o GitHub
+git push -u origin feature/torneio
+Depois de concluíres os dois envios, basta ir ao GitHub e abrir um Pull Request de cada uma dessas branches para a development.
+
+como fazer o clone de um negocio no git
+
+Para clonar um repositório no Git, use o comando git clone seguido do link do projeto:
+
+Copie a URL do repositório na plataforma onde ele está hospedado (GitHub, GitLab, Bitbucket, etc.), clicando no botão Code (ou Clonar) e copiando o endereço HTTPS ou SSH.
+
+Abra o terminal (Prompt de Comando, PowerShell, Terminal ou Git Bash) e navegue até a pasta onde deseja salvar o projeto:
+
+Bash
+cd caminho/da/sua/pasta
+Execute o comando de clone:
+
+Bash
+git clone https://github.com/usuario/nome-do-repositorio.git
+Entre na pasta criada para começar a trabalhar nos arquivos:
+
+Bash
+cd nome-do-repositorio
+Variações úteis
+Clonar com outro nome de pasta:
+
+Bash
+git clone https://github.com/usuario/nome-do-repositorio.git novo-nome-da-pasta
+Clonar apenas uma branch específica:
+
+Bash
+git clone -b nome-da-branch https://github.com/usuario/nome-do-repositorio.git
+
+preciso os commits pra esses arquivos em verde
+
+Seguindo o padrão de Conventional Commits que a equipe já está usando no repositório (feat(...), docs(...), test(...)), o ideal é dividir esses 5 arquivos verdes em 3 commits separados (um para cada responsabilidade). Isso também facilita na hora de preencher a tabela de arquivos e commits no relatório de contribuição individual.   
+diagrama-classes.dot
++ 3
+
+Mensagens de commit recomendadas
+1. Para a classe de infraestrutura (GeradorAleatorioPadrao.java):   
+image_0f1647.png
+
+Plaintext
+feat(infra): adiciona implementacao padrao do gerador aleatorio
+2. Para a interface e o serviço de terreno (ServicoTerreno.java e ServicoTerrenoClimatico.java):   
+image_0f1647.png
+
+Plaintext
+feat(terreno): adiciona interface ServicoTerreno e implementacao climatica
+3. Para os PDFs de documentação (diagramas.pdf e relatorio-refatoracao.pdf):   
+image_0f1385.png
+
+Plaintext
+docs(diagramas): adiciona diagramas da fase 3 e relatorio de refatoracao
+Como fazer no IntelliJ IDEA
+Abra a aba de Commit pressionando Ctrl + K.
+
+Na lista de arquivos (Changes), deixe marcado apenas GeradorAleatorioPadrao.java, cole a primeira mensagem de commit e clique em Commit (não clique em Commit and Push ainda).   
+image_0f1647.png
+
+Repita o processo marcando apenas os dois arquivos da pasta terreno (ServicoTerreno.java e ServicoTerrenoClimatico.java), cole a segunda mensagem e clique em Commit.   
+image_0f1647.png
+
+Por fim, marque apenas os dois PDFs (diagramas.pdf e relatorio-refatoracao.pdf), cole a terceira mensagem e clique em Commit and Push (ou pressione Ctrl + Shift + K para enviar os 3 commits de uma vez para o GitHub).   
+image_0f1385.png
+
+(Observação: repare que no segundo print o relatorio-refatoracao.pdf foi colocado dentro de docs/diagramas/. Se o padrão da equipe for deixar os PDFs de relatório diretamente em docs/ ou docs/pdf/, vale mover esse arquivo antes de commitar.)   
+image_0f1385.png
