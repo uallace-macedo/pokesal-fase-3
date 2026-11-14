@@ -1,4 +1,5 @@
 package resultado;
+
 /**
  * Resultado de uma batalha.
  *
@@ -9,5 +10,4 @@ package resultado;
  * @param pokesalPerdedor nome do Pokésal do perdedor
  */
 public record ResultadoBatalha(
-        String vencedor, String perdedor, int turnos, String pokesalVencedor, String pokesalPerdedor) {}
-
+    String vencedor, String perdedor, int turnos, String pokesalVencedor, String pokesalPerdedor) {}
