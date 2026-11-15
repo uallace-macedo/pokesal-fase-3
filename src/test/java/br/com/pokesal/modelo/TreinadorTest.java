@@ -33,10 +33,10 @@ class TreinadorTest {
   @DisplayName("O treinador começa com um item de cada tipo")
   void testInventarioInicial() {
     assertAll(
-            () -> assertEquals(3, treinador.getInventario().size()),
-            () -> assertEquals(TipoItem.POCAO, pocao.getTipo()),
-            () -> assertEquals(TipoItem.SUPER_POCAO, superPocao.getTipo()),
-            () -> assertEquals(TipoItem.ANTIDOTO, antidoto.getTipo()));
+        () -> assertEquals(3, treinador.getInventario().size()),
+        () -> assertEquals(TipoItem.POCAO, pocao.getTipo()),
+        () -> assertEquals(TipoItem.SUPER_POCAO, superPocao.getTipo()),
+        () -> assertEquals(TipoItem.ANTIDOTO, antidoto.getTipo()));
   }
 
   @Test
@@ -47,20 +47,20 @@ class TreinadorTest {
     boolean terceiro = treinador.usarItem(antidoto);
 
     assertAll(
-            () -> assertTrue(primeiro),
-            () -> assertTrue(segundo),
-            () -> assertFalse(terceiro),
-            () -> assertEquals(2, treinador.getItensUsados()),
-            () -> assertFalse(treinador.podeUsarItem()),
-            () -> assertTrue(antidoto.podeSerUsado()));
+        () -> assertTrue(primeiro),
+        () -> assertTrue(segundo),
+        () -> assertFalse(terceiro),
+        () -> assertEquals(2, treinador.getItensUsados()),
+        () -> assertFalse(treinador.podeUsarItem()),
+        () -> assertTrue(antidoto.podeSerUsado()));
   }
 
   @Test
   @DisplayName("O treinador pode terminar a batalha sem usar itens")
   void testPodeNaoUsarItens() {
     assertAll(
-            () -> assertTrue(treinador.podeUsarItem()),
-            () -> assertEquals(0, treinador.getItensUsados()));
+        () -> assertTrue(treinador.podeUsarItem()),
+        () -> assertEquals(0, treinador.getItensUsados()));
   }
 
   @Test
@@ -90,9 +90,9 @@ class TreinadorTest {
     treinador.reiniciar();
 
     assertAll(
-            () -> assertEquals(100, pokesal.getHpAtual()),
-            () -> assertEquals(0, treinador.getItensUsados()),
-            () -> assertTrue(pocao.podeSerUsado()));
+        () -> assertEquals(100, pokesal.getHpAtual()),
+        () -> assertEquals(0, treinador.getItensUsados()),
+        () -> assertTrue(pocao.podeSerUsado()));
   }
 
   @Test
@@ -107,7 +107,7 @@ class TreinadorTest {
   @DisplayName("Os getters devolvem nome e Pokésal")
   void testGetters() {
     assertAll(
-            () -> assertEquals("Ana", treinador.getNome()),
-            () -> assertEquals(pokesal, treinador.getPokesal()));
+        () -> assertEquals("Ana", treinador.getNome()),
+        () -> assertEquals(pokesal, treinador.getPokesal()));
   }
 }

@@ -26,8 +26,8 @@ class CatalogoPokesalTest {
   @DisplayName("O catálogo tem os seis Pokésals iniciais, na ordem")
   void testNomesDosIniciais() {
     assertEquals(
-            List.of("BulbaSal", "CharSal", "SquirtSal", "ChikoSal", "CyndaSal", "TotoSal"),
-            iniciais.stream().map(Pokesal::getNome).toList());
+        List.of("BulbaSal", "CharSal", "SquirtSal", "ChikoSal", "CyndaSal", "TotoSal"),
+        iniciais.stream().map(Pokesal::getNome).toList());
   }
 
   @Test
@@ -36,11 +36,11 @@ class CatalogoPokesalTest {
     Pokesal bulba = iniciais.get(0);
 
     assertAll(
-            () -> assertEquals(TipoElemental.PLANTA, bulba.getTipo()),
-            () -> assertEquals(110, bulba.getHpMaximo()),
-            () -> assertEquals(45, bulba.getAtaqueEfetivo()),
-            () -> assertEquals(50, bulba.getDefesa()),
-            () -> assertEquals(40, bulba.getVelocidadeEfetiva()));
+        () -> assertEquals(TipoElemental.PLANTA, bulba.getTipo()),
+        () -> assertEquals(110, bulba.getHpMaximo()),
+        () -> assertEquals(45, bulba.getAtaqueEfetivo()),
+        () -> assertEquals(50, bulba.getDefesa()),
+        () -> assertEquals(40, bulba.getVelocidadeEfetiva()));
   }
 
   @Test
@@ -58,13 +58,13 @@ class CatalogoPokesalTest {
       Ataque comStatus = pokesal.getAtaques().get(2);
 
       assertAll(
-              () -> assertEquals(3, pokesal.getAtaques().size()),
-              () -> assertEquals("Investida", normal.nome()),
-              () -> assertEquals(TipoElemental.NORMAL, normal.tipo()),
-              () -> assertEquals(15, normal.danoBase()),
-              () -> assertEquals(pokesal.getTipo(), elemental.tipo()),
-              () -> assertEquals(25, elemental.danoBase()),
-              () -> assertNotEquals(EfeitoStatus.NENHUM, comStatus.efeitoStatus()));
+          () -> assertEquals(3, pokesal.getAtaques().size()),
+          () -> assertEquals("Investida", normal.nome()),
+          () -> assertEquals(TipoElemental.NORMAL, normal.tipo()),
+          () -> assertEquals(15, normal.danoBase()),
+          () -> assertEquals(pokesal.getTipo(), elemental.tipo()),
+          () -> assertEquals(25, elemental.danoBase()),
+          () -> assertNotEquals(EfeitoStatus.NENHUM, comStatus.efeitoStatus()));
     }
   }
 
@@ -76,7 +76,7 @@ class CatalogoPokesalTest {
     List<Pokesal> novos = CatalogoPokesal.criarIniciais();
 
     assertAll(
-            () -> assertNotSame(iniciais.get(0), novos.get(0)),
-            () -> assertEquals(110, novos.get(0).getHpAtual()));
+        () -> assertNotSame(iniciais.get(0), novos.get(0)),
+        () -> assertEquals(110, novos.get(0).getHpAtual()));
   }
 }

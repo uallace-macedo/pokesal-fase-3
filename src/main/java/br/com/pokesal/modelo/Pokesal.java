@@ -30,13 +30,13 @@ public class Pokesal {
    * @throws IllegalArgumentException se algum atributo for inválido
    */
   public Pokesal(
-          String nome,
-          TipoElemental tipo,
-          int hpMaximo,
-          int ataque,
-          int defesa,
-          int velocidade,
-          List<Ataque> ataques) {
+      String nome,
+      TipoElemental tipo,
+      int hpMaximo,
+      int ataque,
+      int defesa,
+      int velocidade,
+      List<Ataque> ataques) {
     if (hpMaximo <= 0) {
       throw new IllegalArgumentException("O HP máximo deve ser maior que zero.");
     }

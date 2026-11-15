@@ -39,9 +39,9 @@ class PokesalTest {
     outro.receberDano(99);
 
     assertAll(
-            () -> assertEquals(0, pokesal.getHpAtual()),
-            () -> assertEquals(1, outro.getHpAtual()),
-            () -> assertTrue(outro.estaVivo()));
+        () -> assertEquals(0, pokesal.getHpAtual()),
+        () -> assertEquals(1, outro.getHpAtual()),
+        () -> assertTrue(outro.estaVivo()));
   }
 
   @Test
@@ -98,22 +98,28 @@ class PokesalTest {
   @DisplayName("HP máximo menor ou igual a zero é rejeitado")
   void testHpMaximoInvalido() {
     assertThrows(
-            IllegalArgumentException.class,
-            () -> new Pokesal("X", TipoElemental.FOGO, 0, 10, 10, 10, List.of()));
+        IllegalArgumentException.class,
+        () -> new Pokesal("X", TipoElemental.FOGO, 0, 10, 10, 10, List.of()));
   }
 
   @Test
   @DisplayName("ATK, DEF e SPD negativos são rejeitados; zero é aceito")
   void testValoresLimiteDeAtributos() {
     assertAll(
-            () -> assertThrows(IllegalArgumentException.class,
-                    () -> new Pokesal("X", TipoElemental.FOGO, 10, -1, 10, 10, List.of())),
-            () -> assertThrows(IllegalArgumentException.class,
-                    () -> new Pokesal("X", TipoElemental.FOGO, 10, 10, -1, 10, List.of())),
-            () -> assertThrows(IllegalArgumentException.class,
-                    () -> new Pokesal("X", TipoElemental.FOGO, 10, 10, 10, -1, List.of())),
-            () -> assertDoesNotThrow(
-                    () -> new Pokesal("X", TipoElemental.FOGO, 10, 0, 0, 0, List.of())));
+        () ->
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> new Pokesal("X", TipoElemental.FOGO, 10, -1, 10, 10, List.of())),
+        () ->
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> new Pokesal("X", TipoElemental.FOGO, 10, 10, -1, 10, List.of())),
+        () ->
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> new Pokesal("X", TipoElemental.FOGO, 10, 10, 10, -1, List.of())),
+        () ->
+            assertDoesNotThrow(() -> new Pokesal("X", TipoElemental.FOGO, 10, 0, 0, 0, List.of())));
   }
 
   @Test
@@ -123,17 +129,17 @@ class PokesalTest {
     boolean segundo = pokesal.aplicarStatus(EfeitoStatus.PARALISADO);
 
     assertAll(
-            () -> assertTrue(primeiro),
-            () -> assertFalse(segundo),
-            () -> assertEquals(EfeitoStatus.QUEIMADO, pokesal.getEfeitoStatus()));
+        () -> assertTrue(primeiro),
+        () -> assertFalse(segundo),
+        () -> assertEquals(EfeitoStatus.QUEIMADO, pokesal.getEfeitoStatus()));
   }
 
   @Test
   @DisplayName("Aplicar NENHUM não conta como efeito")
   void testAplicarNenhumNaoFazNada() {
     assertAll(
-            () -> assertFalse(pokesal.aplicarStatus(EfeitoStatus.NENHUM)),
-            () -> assertEquals(EfeitoStatus.NENHUM, pokesal.getEfeitoStatus()));
+        () -> assertFalse(pokesal.aplicarStatus(EfeitoStatus.NENHUM)),
+        () -> assertEquals(EfeitoStatus.NENHUM, pokesal.getEfeitoStatus()));
   }
 
   @Test
@@ -146,9 +152,9 @@ class PokesalTest {
     pokesal.avancarTurnoStatus();
 
     assertAll(
-            () -> assertEquals(1, restantes),
-            () -> assertEquals(EfeitoStatus.NENHUM, pokesal.getEfeitoStatus()),
-            () -> assertTrue(pokesal.aplicarStatus(EfeitoStatus.PARALISADO)));
+        () -> assertEquals(1, restantes),
+        () -> assertEquals(EfeitoStatus.NENHUM, pokesal.getEfeitoStatus()),
+        () -> assertTrue(pokesal.aplicarStatus(EfeitoStatus.PARALISADO)));
   }
 
   @Test
@@ -184,8 +190,8 @@ class PokesalTest {
     lento.aplicarStatus(EfeitoStatus.PARALISADO);
 
     assertAll(
-            () -> assertEquals(45, pokesal.getVelocidadeEfetiva()),
-            () -> assertEquals(0, lento.getVelocidadeEfetiva()));
+        () -> assertEquals(45, pokesal.getVelocidadeEfetiva()),
+        () -> assertEquals(0, lento.getVelocidadeEfetiva()));
   }
 
   @Test
@@ -197,8 +203,8 @@ class PokesalTest {
     pokesal.restaurar();
 
     assertAll(
-            () -> assertEquals(100, pokesal.getHpAtual()),
-            () -> assertEquals(EfeitoStatus.NENHUM, pokesal.getEfeitoStatus()));
+        () -> assertEquals(100, pokesal.getHpAtual()),
+        () -> assertEquals(EfeitoStatus.NENHUM, pokesal.getEfeitoStatus()));
   }
 
   @Test
@@ -214,9 +220,9 @@ class PokesalTest {
   @DisplayName("Os getters devolvem os dados informados na criação")
   void testGetters() {
     assertAll(
-            () -> assertEquals("Teste", pokesal.getNome()),
-            () -> assertEquals(TipoElemental.FOGO, pokesal.getTipo()),
-            () -> assertEquals(100, pokesal.getHpMaximo()),
-            () -> assertEquals(30, pokesal.getDefesa()));
+        () -> assertEquals("Teste", pokesal.getNome()),
+        () -> assertEquals(TipoElemental.FOGO, pokesal.getTipo()),
+        () -> assertEquals(100, pokesal.getHpMaximo()),
+        () -> assertEquals(30, pokesal.getDefesa()));
   }
 }

@@ -57,13 +57,13 @@ public class Batalha {
    * @param contexto estado externo que pode interromper a batalha
    */
   public Batalha(
-          Treinador treinador1,
-          Treinador treinador2,
-          ServicoTerreno servicoTerreno,
-          GeradorAleatorio gerador,
-          RepositorioResultados repositorio,
-          RegistroBatalha registro,
-          ContextoBatalha contexto) {
+      Treinador treinador1,
+      Treinador treinador2,
+      ServicoTerreno servicoTerreno,
+      GeradorAleatorio gerador,
+      RepositorioResultados repositorio,
+      RegistroBatalha registro,
+      ContextoBatalha contexto) {
     this.treinador1 = treinador1;
     this.treinador2 = treinador2;
     this.gerador = gerador;
@@ -80,15 +80,14 @@ public class Batalha {
    */
   public boolean jogador1AtacaPrimeiro() {
     return treinador1.getPokesal().getVelocidadeEfetiva()
-            >= treinador2.getPokesal().getVelocidadeEfetiva();
+        >= treinador2.getPokesal().getVelocidadeEfetiva();
   }
 
   /**
    * Calcula o dano de um golpe que acertou.
    *
-   * <p>Fórmula: {@code max(1, danoBase + ATK efetivo - DEF)}, multiplicado pela vantagem
-   * elemental, pelo bônus do terreno e, se crítico, por 1,5; o resultado é arredondado e tem
-   * mínimo de 1.
+   * <p>Fórmula: {@code max(1, danoBase + ATK efetivo - DEF)}, multiplicado pela vantagem elemental,
+   * pelo bônus do terreno e, se crítico, por 1,5; o resultado é arredondado e tem mínimo de 1.
    *
    * @param ataque golpe usado
    * @param atacante Pokésal que ataca
@@ -100,8 +99,8 @@ public class Batalha {
     int bruto = ataque.danoBase() + atacante.getAtaqueEfetivo() - defensor.getDefesa();
     int base = Math.max(DANO_MINIMO, bruto);
     double multiplicador =
-            ataque.tipo().multiplicadorContra(defensor.getTipo())
-                    * terreno.multiplicadorDano(ataque.tipo());
+        ataque.tipo().multiplicadorContra(defensor.getTipo())
+            * terreno.multiplicadorDano(ataque.tipo());
     if (critico) {
       multiplicador *= MULTIPLICADOR_CRITICO;
     }
@@ -187,8 +186,8 @@ public class Batalha {
       pokesal.avancarTurnoStatus();
     }
     if (terreno == TipoTerreno.CANTEIRO_CENTRAL
-            && pokesal.getTipo() == TipoElemental.PLANTA
-            && pokesal.estaVivo()) {
+        && pokesal.getTipo() == TipoElemental.PLANTA
+        && pokesal.estaVivo()) {
       int hpAntes = pokesal.getHpAtual();
       int cura = pokesal.getHpMaximo() * PERCENTUAL_CURA_CANTEIRO / CEM_PORCENTO;
       cura = Math.max(DANO_MINIMO, cura);
@@ -268,12 +267,12 @@ public class Batalha {
   private void finalizar(Treinador vencedor) {
     Treinador perdedor = vencedor == treinador1 ? treinador2 : treinador1;
     resultado =
-            new ResultadoBatalha(
-                    vencedor.getNome(),
-                    perdedor.getNome(),
-                    turnos,
-                    vencedor.getPokesal().getNome(),
-                    perdedor.getPokesal().getNome());
+        new ResultadoBatalha(
+            vencedor.getNome(),
+            perdedor.getNome(),
+            turnos,
+            vencedor.getPokesal().getNome(),
+            perdedor.getPokesal().getNome());
     try {
       repositorio.salvar(resultado);
     } catch (RuntimeException e) {

@@ -32,10 +32,10 @@ public class Main {
     RegistroBatalha registro = new RegistroBatalhaConsole();
     ContextoBatalha contexto = new ContextoBatalha();
     ServicoTerrenoClimatico servicoTerreno =
-            new ServicoTerrenoClimatico(Clock.system(ZoneId.of("America/Bahia")), gerador);
+        new ServicoTerrenoClimatico(Clock.system(ZoneId.of("America/Bahia")), gerador);
     ExecutorBatalhaConsole executor =
-            new ExecutorBatalhaConsole(
-                    entrada, servicoTerreno, gerador, repositorio, registro, contexto);
+        new ExecutorBatalhaConsole(
+            entrada, servicoTerreno, gerador, repositorio, registro, contexto);
     new InterfaceConsole(entrada, new Torneio(executor), repositorio).iniciar();
   }
 }

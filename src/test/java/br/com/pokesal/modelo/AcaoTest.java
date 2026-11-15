@@ -12,23 +12,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class AcaoTest {
-    private final Ataque ataque =
-            new Ataque("Golpe", TipoElemental.NORMAL, 10, 100, EfeitoStatus.NENHUM);
-    private final Item item = new Item(TipoItem.POCAO);
+  private final Ataque ataque =
+      new Ataque("Golpe", TipoElemental.NORMAL, 10, 100, EfeitoStatus.NENHUM);
+  private final Item item = new Item(TipoItem.POCAO);
 
-    @Test
-    @DisplayName("Ação de ataque e ação de item são distinguíveis")
-    void testTiposDeAcao() {
-        assertAll(
-                () -> assertTrue(Acao.atacar(ataque).ehAtaque()),
-                () -> assertFalse(Acao.usarItem(item).ehAtaque()));
-    }
+  @Test
+  @DisplayName("Ação de ataque e ação de item são distinguíveis")
+  void testTiposDeAcao() {
+    assertAll(
+        () -> assertTrue(Acao.atacar(ataque).ehAtaque()),
+        () -> assertFalse(Acao.usarItem(item).ehAtaque()));
+  }
 
-    @Test
-    @DisplayName("Uma ação precisa de exatamente um ataque ou um item")
-    void testAcaoInvalida() {
-        assertAll(
-                () -> assertThrows(IllegalArgumentException.class, () -> new Acao(null, null)),
-                () -> assertThrows(IllegalArgumentException.class, () -> new Acao(ataque, item)));
-    }
+  @Test
+  @DisplayName("Uma ação precisa de exatamente um ataque ou um item")
+  void testAcaoInvalida() {
+    assertAll(
+        () -> assertThrows(IllegalArgumentException.class, () -> new Acao(null, null)),
+        () -> assertThrows(IllegalArgumentException.class, () -> new Acao(ataque, item)));
+  }
 }

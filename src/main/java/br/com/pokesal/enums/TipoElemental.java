@@ -3,8 +3,8 @@ package br.com.pokesal.enums;
 /**
  * Tipos elementais de Pokésals e de ataques.
  *
- * <p>Fogo vence Planta, Planta vence Água e Água vence Fogo. O tipo {@link #NORMAL} é usado
- * apenas em ataques e não tem vantagem nem desvantagem contra nenhum tipo.
+ * <p>Fogo vence Planta, Planta vence Água e Água vence Fogo. O tipo {@link #NORMAL} é usado apenas
+ * em ataques e não tem vantagem nem desvantagem contra nenhum tipo.
  */
 public enum TipoElemental {
   /** Tipo fogo. */
@@ -38,7 +38,7 @@ public enum TipoElemental {
 
   private static boolean venceu(TipoElemental atacante, TipoElemental defensor) {
     return (atacante == FOGO && defensor == PLANTA)
-            || (atacante == PLANTA && defensor == AGUA)
-            || (atacante == AGUA && defensor == FOGO);
+        || (atacante == PLANTA && defensor == AGUA)
+        || (atacante == AGUA && defensor == FOGO);
   }
 }

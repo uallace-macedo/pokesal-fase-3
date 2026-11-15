@@ -42,8 +42,8 @@ public class Treinador {
    * Usa um item do inventário no próprio Pokésal.
    *
    * @param item item a usar
-   * @return {@code true} se o item foi usado; {@code false} se o limite foi atingido, o item já
-   *     foi usado ou não pertence ao inventário
+   * @return {@code true} se o item foi usado; {@code false} se o limite foi atingido, o item já foi
+   *     usado ou não pertence ao inventário
    */
   public boolean usarItem(Item item) {
     if (!podeUsarItem() || !inventario.contains(item) || !item.podeSerUsado()) {

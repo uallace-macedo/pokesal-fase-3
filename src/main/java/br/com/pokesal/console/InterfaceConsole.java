@@ -29,7 +29,7 @@ public class InterfaceConsole {
    * @param repositorio repositório consultado para exibir o histórico
    */
   public InterfaceConsole(
-          EntradaConsole entrada, Torneio torneio, RepositorioResultados repositorio) {
+      EntradaConsole entrada, Torneio torneio, RepositorioResultados repositorio) {
     this.entrada = entrada;
     this.torneio = torneio;
     this.repositorio = repositorio;
@@ -59,8 +59,17 @@ public class InterfaceConsole {
     System.out.println("Histórico de batalhas:");
     for (ResultadoBatalha r : repositorio.listar()) {
       System.out.println(
-              "  " + r.vencedor() + " (" + r.pokesalVencedor() + ") venceu " + r.perdedor()
-                      + " (" + r.pokesalPerdedor() + ") em " + r.turnos() + " turnos");
+          "  "
+              + r.vencedor()
+              + " ("
+              + r.pokesalVencedor()
+              + ") venceu "
+              + r.perdedor()
+              + " ("
+              + r.pokesalPerdedor()
+              + ") em "
+              + r.turnos()
+              + " turnos");
     }
   }
 

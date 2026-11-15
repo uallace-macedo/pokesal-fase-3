@@ -13,7 +13,7 @@ import br.com.pokesal.enums.TipoElemental;
  * @param efeitoStatus efeito aplicado ao alvo quando o golpe acerta, ou {@code NENHUM}
  */
 public record Ataque(
-        String nome, TipoElemental tipo, int danoBase, int precisao, EfeitoStatus efeitoStatus) {
+    String nome, TipoElemental tipo, int danoBase, int precisao, EfeitoStatus efeitoStatus) {
 
   /** Precisão mínima aceita. */
   public static final int PRECISAO_MINIMA = 0;

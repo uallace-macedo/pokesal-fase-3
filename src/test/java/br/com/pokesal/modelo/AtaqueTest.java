@@ -21,18 +21,18 @@ class AtaqueTest {
   @DisplayName("Precisão fora de 0 a 100 é rejeitada")
   void testPrecisaoForaDoIntervaloEhInvalida() {
     assertThrows(
-            IllegalArgumentException.class,
-            () -> new Ataque("A", TipoElemental.NORMAL, 10, -1, EfeitoStatus.NENHUM));
+        IllegalArgumentException.class,
+        () -> new Ataque("A", TipoElemental.NORMAL, 10, -1, EfeitoStatus.NENHUM));
     assertThrows(
-            IllegalArgumentException.class,
-            () -> new Ataque("A", TipoElemental.NORMAL, 10, 101, EfeitoStatus.NENHUM));
+        IllegalArgumentException.class,
+        () -> new Ataque("A", TipoElemental.NORMAL, 10, 101, EfeitoStatus.NENHUM));
   }
 
   @Test
   @DisplayName("Dano base negativo é rejeitado")
   void testDanoBaseNegativoEhInvalido() {
     assertThrows(
-            IllegalArgumentException.class,
-            () -> new Ataque("A", TipoElemental.NORMAL, -1, 100, EfeitoStatus.NENHUM));
+        IllegalArgumentException.class,
+        () -> new Ataque("A", TipoElemental.NORMAL, -1, 100, EfeitoStatus.NENHUM));
   }
 }

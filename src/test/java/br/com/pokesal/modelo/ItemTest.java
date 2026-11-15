@@ -76,13 +76,13 @@ class ItemTest {
     pocao.aplicar(alvo);
 
     assertAll(
-            () -> assertFalse(pocao.podeSerUsado()),
-            () -> assertThrows(IllegalStateException.class, () -> pocao.aplicar(alvo)));
+        () -> assertFalse(pocao.podeSerUsado()),
+        () -> assertThrows(IllegalStateException.class, () -> pocao.aplicar(alvo)));
 
     pocao.reiniciar();
 
     assertAll(
-            () -> assertTrue(pocao.podeSerUsado()),
-            () -> assertEquals(TipoItem.POCAO, pocao.getTipo()));
+        () -> assertTrue(pocao.podeSerUsado()),
+        () -> assertEquals(TipoItem.POCAO, pocao.getTipo()));
   }
 }

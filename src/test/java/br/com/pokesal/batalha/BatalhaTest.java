@@ -41,9 +41,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * Colaboradores mockados: GeradorAleatorio, ServicoTerreno, RepositorioResultados,
- * RegistroBatalha e ContextoBatalha (sem parada). Pokesal e Treinador são objetos reais (ver
- * documento de testes).
+ * Colaboradores mockados: GeradorAleatorio, ServicoTerreno, RepositorioResultados, RegistroBatalha
+ * e ContextoBatalha (sem parada). Pokesal e Treinador são objetos reais (ver documento de testes).
  *
  * <p>Com o golpe padrão (dano base 20), ATK 50 e DEF 30, o dano sem multiplicadores é 40.
  */
@@ -98,9 +97,7 @@ class BatalhaTest {
 
     int dano = batalha.executarAtaque(golpe, alfa, beta);
 
-    assertAll(
-            () -> assertEquals(60, dano),
-            () -> assertEquals(40, beta.getHpAtual()));
+    assertAll(() -> assertEquals(60, dano), () -> assertEquals(40, beta.getHpAtual()));
     verify(registro).registrarDano(beta, 60, true);
   }
 
@@ -125,9 +122,7 @@ class BatalhaTest {
 
     int dano = batalha.executarAtaque(impreciso, alfa, beta);
 
-    assertAll(
-            () -> assertEquals(0, dano),
-            () -> assertEquals(100, beta.getHpAtual()));
+    assertAll(() -> assertEquals(0, dano), () -> assertEquals(100, beta.getHpAtual()));
     verify(registro).registrarDano(beta, 0, false);
     verify(gerador, never()).proximoInteiro(FAIXA_CRITICO);
   }
@@ -183,8 +178,8 @@ class BatalhaTest {
     Batalha batalha = criarBatalha(TipoTerreno.SEM_EFEITO);
 
     assertAll(
-            () -> assertEquals(80, batalha.calcularDano(fogo, alfa, planta, false)),
-            () -> assertEquals(20, batalha.calcularDano(fogo, alfa, agua, false)));
+        () -> assertEquals(80, batalha.calcularDano(fogo, alfa, planta, false)),
+        () -> assertEquals(20, batalha.calcularDano(fogo, alfa, agua, false)));
   }
 
   @Test
@@ -211,8 +206,8 @@ class BatalhaTest {
     Batalha batalha = criarBatalha(TipoTerreno.POCA_DAGUA);
 
     assertAll(
-            () -> assertEquals(44, batalha.calcularDano(agua, alfa, alvoAgua, false)),
-            () -> assertEquals(20, batalha.calcularDano(fogo, alfa, alvoAgua, false)));
+        () -> assertEquals(44, batalha.calcularDano(agua, alfa, alvoAgua, false)),
+        () -> assertEquals(20, batalha.calcularDano(fogo, alfa, alvoAgua, false)));
   }
 
   @Test
@@ -243,15 +238,27 @@ class BatalhaTest {
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
 
     Batalha rapidoPrimeiro =
-            new Batalha(new Treinador("A", rapido), new Treinador("B", lento),
-                    servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(
+            new Treinador("A", rapido),
+            new Treinador("B", lento),
+            servicoTerreno,
+            gerador,
+            repositorio,
+            registro,
+            contexto);
     Batalha lentoPrimeiro =
-            new Batalha(new Treinador("A", lento), new Treinador("B", rapido),
-                    servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(
+            new Treinador("A", lento),
+            new Treinador("B", rapido),
+            servicoTerreno,
+            gerador,
+            repositorio,
+            registro,
+            contexto);
 
     assertAll(
-            () -> assertTrue(rapidoPrimeiro.jogador1AtacaPrimeiro()),
-            () -> assertFalse(lentoPrimeiro.jogador1AtacaPrimeiro()));
+        () -> assertTrue(rapidoPrimeiro.jogador1AtacaPrimeiro()),
+        () -> assertFalse(lentoPrimeiro.jogador1AtacaPrimeiro()));
   }
 
   @Test
@@ -269,7 +276,7 @@ class BatalhaTest {
     Treinador paralisado = new Treinador("A", quaseRapido);
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
     Batalha batalha =
-            new Batalha(paralisado, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(paralisado, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
     quaseRapido.aplicarStatus(EfeitoStatus.PARALISADO);
 
     assertFalse(batalha.jogador1AtacaPrimeiro());
@@ -284,7 +291,7 @@ class BatalhaTest {
     Treinador donoDaPlanta = new Treinador("Ana", planta);
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.CANTEIRO_CENTRAL);
     Batalha batalha =
-            new Batalha(donoDaPlanta, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(donoDaPlanta, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
     sortearAcertoSemCritico();
     planta.aplicarStatus(EfeitoStatus.ENVENENADO);
 
@@ -324,8 +331,8 @@ class BatalhaTest {
     Item estranho = new Item(br.com.pokesal.enums.TipoItem.POCAO);
 
     assertThrows(
-            IllegalArgumentException.class,
-            () -> batalha.executarTurno(Acao.usarItem(estranho), Acao.atacar(golpe)));
+        IllegalArgumentException.class,
+        () -> batalha.executarTurno(Acao.usarItem(estranho), Acao.atacar(golpe)));
     verify(registro, never()).registrarUsoItem(any(Treinador.class), any(Item.class));
   }
 
@@ -340,9 +347,9 @@ class BatalhaTest {
     batalha.processarFimDoTurno(beta);
 
     assertAll(
-            () -> assertEquals(95, hpAposPrimeiro),
-            () -> assertEquals(90, beta.getHpAtual()),
-            () -> assertEquals(EfeitoStatus.NENHUM, beta.getEfeitoStatus()));
+        () -> assertEquals(95, hpAposPrimeiro),
+        () -> assertEquals(90, beta.getHpAtual()),
+        () -> assertEquals(EfeitoStatus.NENHUM, beta.getEfeitoStatus()));
     verify(registro, times(2)).registrarEfeitoStatus(beta, EfeitoStatus.QUEIMADO, 5);
   }
 
@@ -358,8 +365,7 @@ class BatalhaTest {
     batalha.processarFimDoTurno(beta);
 
     assertAll(
-            () -> assertEquals(55, planta.getHpAtual()),
-            () -> assertEquals(50, beta.getHpAtual()));
+        () -> assertEquals(55, planta.getHpAtual()), () -> assertEquals(50, beta.getHpAtual()));
     verify(registro).registrarEfeitoTerreno(planta, TipoTerreno.CANTEIRO_CENTRAL, 5);
     verify(registro, never()).registrarEfeitoTerreno(eq(beta), any(TipoTerreno.class), anyInt());
   }
@@ -389,7 +395,7 @@ class BatalhaTest {
     assertSame(ana, batalha.verificarVencedor().orElseThrow());
 
     Batalha outra =
-            new Batalha(ana, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(ana, bruno, servicoTerreno, gerador, repositorio, registro, contexto);
     alfa.receberDano(100);
     beta.restaurar();
     assertSame(bruno, outra.verificarVencedor().orElseThrow());
@@ -402,8 +408,14 @@ class BatalhaTest {
     Pokesal fraco = criarPokesal("Fraco", TipoElemental.NORMAL, 30, 40);
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
     Batalha batalha =
-            new Batalha(new Treinador("Ana", rapido), new Treinador("Bruno", fraco),
-                    servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(
+            new Treinador("Ana", rapido),
+            new Treinador("Bruno", fraco),
+            servicoTerreno,
+            gerador,
+            repositorio,
+            registro,
+            contexto);
     sortearAcertoSemCritico();
     ArgumentCaptor<ResultadoBatalha> captor = ArgumentCaptor.forClass(ResultadoBatalha.class);
 
@@ -412,15 +424,15 @@ class BatalhaTest {
     verify(repositorio, times(1)).salvar(captor.capture());
     ResultadoBatalha salvo = captor.getValue();
     assertAll(
-            () -> assertEquals("Ana", salvo.vencedor()),
-            () -> assertEquals("Bruno", salvo.perdedor()),
-            () -> assertEquals(1, salvo.turnos()),
-            () -> assertEquals("Rapido", salvo.pokesalVencedor()),
-            () -> assertEquals("Fraco", salvo.pokesalPerdedor()),
-            () -> assertTrue(batalha.estaTerminada()),
-            () -> assertEquals(salvo, batalha.getResultado().orElseThrow()));
+        () -> assertEquals("Ana", salvo.vencedor()),
+        () -> assertEquals("Bruno", salvo.perdedor()),
+        () -> assertEquals(1, salvo.turnos()),
+        () -> assertEquals("Rapido", salvo.pokesalVencedor()),
+        () -> assertEquals("Fraco", salvo.pokesalPerdedor()),
+        () -> assertTrue(batalha.estaTerminada()),
+        () -> assertEquals(salvo, batalha.getResultado().orElseThrow()));
     verify(registro, times(1))
-            .registrarAtaque(any(Pokesal.class), any(Ataque.class), any(Pokesal.class));
+        .registrarAtaque(any(Pokesal.class), any(Ataque.class), any(Pokesal.class));
   }
 
   @Test
@@ -429,24 +441,25 @@ class BatalhaTest {
     Pokesal fraco = criarPokesal("Fraco", TipoElemental.NORMAL, 30, 40);
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
     Batalha batalha =
-            new Batalha(
-                    ana,
-                    new Treinador("Bruno", fraco),
-                    servicoTerreno,
-                    gerador,
-                    repositorio,
-                    registro,
-                    contexto);
+        new Batalha(
+            ana,
+            new Treinador("Bruno", fraco),
+            servicoTerreno,
+            gerador,
+            repositorio,
+            registro,
+            contexto);
     sortearAcertoSemCritico();
     doThrow(new IllegalStateException("banco indisponível"))
-            .when(repositorio).salvar(any(ResultadoBatalha.class));
+        .when(repositorio)
+        .salvar(any(ResultadoBatalha.class));
 
     assertDoesNotThrow(() -> batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe)));
 
     assertAll(
-            () -> assertTrue(batalha.estaTerminada()),
-            () -> assertEquals("Ana", batalha.verificarVencedor().orElseThrow().getNome()),
-            () -> assertEquals("Ana", batalha.getResultado().orElseThrow().vencedor()));
+        () -> assertTrue(batalha.estaTerminada()),
+        () -> assertEquals("Ana", batalha.verificarVencedor().orElseThrow().getNome()),
+        () -> assertEquals("Ana", batalha.getResultado().orElseThrow().vencedor()));
     verify(repositorio, times(1)).salvar(any(ResultadoBatalha.class));
   }
 
@@ -459,9 +472,9 @@ class BatalhaTest {
     batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
 
     assertAll(
-            () -> assertFalse(batalha.estaTerminada()),
-            () -> assertTrue(batalha.getResultado().isEmpty()),
-            () -> assertEquals(1, batalha.getTurnos()));
+        () -> assertFalse(batalha.estaTerminada()),
+        () -> assertTrue(batalha.getResultado().isEmpty()),
+        () -> assertEquals(1, batalha.getTurnos()));
     verify(repositorio, never()).salvar(any(ResultadoBatalha.class));
   }
 
@@ -471,20 +484,20 @@ class BatalhaTest {
     Pokesal fraco = criarPokesal("Fraco", TipoElemental.NORMAL, 30, 40);
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
     Batalha batalha =
-            new Batalha(
-                    ana,
-                    new Treinador("Bruno", fraco),
-                    servicoTerreno,
-                    gerador,
-                    repositorio,
-                    registro,
-                    contexto);
+        new Batalha(
+            ana,
+            new Treinador("Bruno", fraco),
+            servicoTerreno,
+            gerador,
+            repositorio,
+            registro,
+            contexto);
     sortearAcertoSemCritico();
     batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
 
     assertThrows(
-            IllegalStateException.class,
-            () -> batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe)));
+        IllegalStateException.class,
+        () -> batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe)));
     verify(repositorio, times(1)).salvar(any(ResultadoBatalha.class));
   }
 
@@ -495,8 +508,14 @@ class BatalhaTest {
     Pokesal envenenado = criarPokesal("Envenenado", TipoElemental.NORMAL, 100, 40);
     when(servicoTerreno.consultar()).thenReturn(TipoTerreno.SEM_EFEITO);
     Batalha batalha =
-            new Batalha(new Treinador("Ana", rapido), new Treinador("Bruno", envenenado),
-                    servicoTerreno, gerador, repositorio, registro, contexto);
+        new Batalha(
+            new Treinador("Ana", rapido),
+            new Treinador("Bruno", envenenado),
+            servicoTerreno,
+            gerador,
+            repositorio,
+            registro,
+            contexto);
     sortearAcertoSemCritico();
     rapido.receberDano(55);
     rapido.aplicarStatus(EfeitoStatus.ENVENENADO);
@@ -504,8 +523,8 @@ class BatalhaTest {
     batalha.executarTurno(Acao.atacar(golpe), Acao.atacar(golpe));
 
     assertAll(
-            () -> assertEquals(0, rapido.getHpAtual()),
-            () -> assertEquals("Bruno", batalha.getResultado().orElseThrow().vencedor()));
+        () -> assertEquals(0, rapido.getHpAtual()),
+        () -> assertEquals("Bruno", batalha.getResultado().orElseThrow().vencedor()));
     verify(repositorio, times(1)).salvar(any(ResultadoBatalha.class));
   }
 

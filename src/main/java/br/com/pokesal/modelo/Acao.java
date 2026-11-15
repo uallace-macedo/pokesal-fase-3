@@ -8,43 +8,43 @@ package br.com.pokesal.modelo;
  */
 public record Acao(Ataque ataque, Item item) {
 
-    /**
-     * Valida que exatamente um dos dois campos foi informado.
-     *
-     * @throws IllegalArgumentException se ambos ou nenhum forem informados
-     */
-    public Acao {
-        if ((ataque == null) == (item == null)) {
-            throw new IllegalArgumentException("Informe apenas um ataque ou apenas um item.");
-        }
+  /**
+   * Valida que exatamente um dos dois campos foi informado.
+   *
+   * @throws IllegalArgumentException se ambos ou nenhum forem informados
+   */
+  public Acao {
+    if ((ataque == null) == (item == null)) {
+      throw new IllegalArgumentException("Informe apenas um ataque ou apenas um item.");
     }
+  }
 
-    /**
-     * Cria uma ação de ataque.
-     *
-     * @param ataque golpe a executar
-     * @return ação de ataque
-     */
-    public static Acao atacar(Ataque ataque) {
-        return new Acao(ataque, null);
-    }
+  /**
+   * Cria uma ação de ataque.
+   *
+   * @param ataque golpe a executar
+   * @return ação de ataque
+   */
+  public static Acao atacar(Ataque ataque) {
+    return new Acao(ataque, null);
+  }
 
-    /**
-     * Cria uma ação de uso de item.
-     *
-     * @param item item a usar
-     * @return ação de uso de item
-     */
-    public static Acao usarItem(Item item) {
-        return new Acao(null, item);
-    }
+  /**
+   * Cria uma ação de uso de item.
+   *
+   * @param item item a usar
+   * @return ação de uso de item
+   */
+  public static Acao usarItem(Item item) {
+    return new Acao(null, item);
+  }
 
-    /**
-     * Indica se a ação é um ataque.
-     *
-     * @return {@code true} se for ataque
-     */
-    public boolean ehAtaque() {
-        return ataque != null;
-    }
+  /**
+   * Indica se a ação é um ataque.
+   *
+   * @return {@code true} se for ataque
+   */
+  public boolean ehAtaque() {
+    return ataque != null;
+  }
 }
